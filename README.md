@@ -84,18 +84,14 @@ Reactive vue forms
 ```
 
 
-```html
-  <h1>Can also be used as a directive</h1>
-```
+Can also be used as a directive
+
 
 ```javascript
   //main.js
   import { formControlDirective } from './directive'
   const app = createApp(App);
   app.use(formControlDirective);
-
-  // inside component
-
 
   //App.vue
   const form = new ReactiveForm({
@@ -107,5 +103,26 @@ Reactive vue forms
   <select v-form-control="form.option">
     <option v-for="value in [1, 2, 3]" :key="value" :value="value">{{ value }}</option>
   </select>
+```
 
+
+Inside custom component
+
+```html
+  // Inside custom component
+
+  <template>
+    <span>
+      <input type="text" v-form-control="formControl"  name="custom-input"/>
+    </span>
+  </template>
+
+```
+
+```javascript
+  <script lang="ts" setup>
+    // pass control as a prop inside a custom component
+    // prop name may be different
+    const { formControl } = defineProps(['formControl']);
+  </script>
 ```
