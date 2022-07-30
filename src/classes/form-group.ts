@@ -5,15 +5,15 @@ import { AbstractControl } from "./abstract-conrol";
 
 
 
-export class FormGroup<ListControlNames extends Record<string, AbstractControl<any>> = any> extends AbstractControl<any> {
+export class FormGroup<ListControlNames extends Record<string, AbstractControl> = any> extends AbstractControl {
 
-  private _controls: Record<string, AbstractControl<any>> = {};
+  private _controls: Record<string, AbstractControl>;
   private _errors: ValidationErrors | null = null;
   private _value: any[] = [];
   private _validators: ValidationFn[] = [];
 
   dirty: boolean = false;
-  parent: AbstractControl<any> | null = null;
+  parent: AbstractControl = null;
 
   get validators(): ValidationFn[] {
     return this._validators;
@@ -85,7 +85,7 @@ export class FormGroup<ListControlNames extends Record<string, AbstractControl<a
     return findControl(this, path)
   }
 
-  setControls(controls: Record<string, AbstractControl<any>>) {
+  setControls(controls: Record<string, AbstractControl>) {
     this.configureControls({ ...controls })
   }
 
@@ -126,7 +126,7 @@ export class FormGroup<ListControlNames extends Record<string, AbstractControl<a
     this.validate();
   }
 
-  private configureControls(controls: Record<string, AbstractControl<any>>) {
+  private configureControls(controls: Record<string, AbstractControl>) {
     for (const controlName in controls) {
       this._controls[controlName] = controls[controlName];
       this._controls[controlName].parent = this;

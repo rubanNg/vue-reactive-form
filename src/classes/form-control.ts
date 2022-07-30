@@ -2,14 +2,14 @@ import { ValidationErrors, ValidationFn } from "../types";
 import { toArray } from "../utils";
 import { AbstractControl } from "./abstract-conrol";
 
-export class FormControl<TValue> extends AbstractControl<TValue> {
+export class FormControl extends AbstractControl {
 
 
-  private _value: TValue = null;
+  private _value: string = null;
   private _errors: ValidationErrors = null;
   private _validators: ValidationFn[] = [];
 
-  parent: AbstractControl<TValue> = null;
+  parent: AbstractControl = null;
   dirty: boolean = false;
 
 
@@ -17,7 +17,7 @@ export class FormControl<TValue> extends AbstractControl<TValue> {
     return this._validators;
   }
 
-  get errors(): ValidationErrors | null  {
+  get errors(): ValidationErrors  {
     return this._errors;
   };
 
@@ -26,25 +26,25 @@ export class FormControl<TValue> extends AbstractControl<TValue> {
   }
 
   get value() {
-    return this._value as TValue;
+    return this._value;
   }
 
-  set value(value: TValue) {
+  set value(value) {
     this._value = value;
     this.onChange();
   }
 
-  constructor(value?: TValue, validators: ValidationFn[] = []) {
+  constructor(value: any, validators: ValidationFn[] = []) {
     super();
     this._value = value || null;
     this._validators = validators;
   }
 
-  reset(value: TValue) {
+  reset(value: any) {
     this.value = value;
   };
 
-  setValue(value: TValue) {
+  setValue(value: any) {
     this.value = value;
   }
 

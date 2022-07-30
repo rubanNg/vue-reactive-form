@@ -18,7 +18,7 @@ export function defineProperties(target: any) {
   Object.defineProperties(target, result);
 }
 
-export function findControl<TValue>(parent: any, path: string): AbstractControl<TValue> {
+export function findControl(parent: any, path: string): AbstractControl {
   let value = null;
   for (const segment of path.split(".")) {
     value = (value || parent);

@@ -4,9 +4,9 @@ import { toArray, findControl, defineProperties } from "../utils";
 import { AbstractControl } from "./abstract-conrol";
 
 
-export class FormArray extends AbstractControl<any> {
+export class FormArray extends AbstractControl {
 
-  private _controls: Array<AbstractControl<any>> = [];
+  private _controls: Array<AbstractControl> = [];
   private _errors: ValidationErrors | null = null;
   private _value: any[] = [];
   private _validators: ValidationFn[] = [];
@@ -15,7 +15,7 @@ export class FormArray extends AbstractControl<any> {
     return this._validators;
   }
   dirty: boolean = false;
-  parent: AbstractControl<any> | null = null;
+  parent: AbstractControl = null;
 
 
   get controls() {
@@ -34,7 +34,7 @@ export class FormArray extends AbstractControl<any> {
     return this._controls.map(control => control.value);
   }
 
-  constructor(controls: Array<AbstractControl<any>>, validators: ValidationFn[] = []) {
+  constructor(controls: Array<AbstractControl>, validators: ValidationFn[] = []) {
     super();
     this._validators = validators;
     this.configureControls([...controls]);
@@ -76,7 +76,7 @@ export class FormArray extends AbstractControl<any> {
     return findControl(this, path)
   }
 
-  setControls(controls: Array<AbstractControl<any>>) {
+  setControls(controls: Array<AbstractControl>) {
     this.configureControls(controls);
   }
 
@@ -122,9 +122,9 @@ export class FormArray extends AbstractControl<any> {
     this.validate();
   }
 
-  private configureControls(controls: Array<AbstractControl<any>>) {
+  private configureControls(controls: Array<AbstractControl>) {
     for (const control of controls) {
-      control.parent = this as AbstractControl<any>;
+      control.parent = this as AbstractControl;
     }
     this._controls.push(...controls);
     defineProperties(this);

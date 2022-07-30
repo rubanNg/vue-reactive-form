@@ -1,16 +1,16 @@
 import { ValidationErrors, ValidationFn } from "../types";
 
 
-export abstract class AbstractControl<TValue> {
+export abstract class AbstractControl {
 
   constructor() {}
 
 
   abstract validators: ValidationFn[]; 
-  abstract value: TValue;
+  abstract value: any;
   abstract dirty: boolean;
   abstract valid: boolean;
-  abstract parent: AbstractControl<TValue> | null;
+  abstract parent: AbstractControl | null;
   abstract errors: ValidationErrors | null;
   abstract setValue(value: any): void;
   abstract setDirty(value: boolean): void;

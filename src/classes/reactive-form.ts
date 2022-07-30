@@ -2,7 +2,7 @@ import { AbstractControl } from "./abstract-conrol";
 import { defineProperties, findControl } from "../utils";
 import { ref } from "vue";
 
-export class ReactiveForm<T extends Record<string, AbstractControl<any>>> {
+export class ReactiveForm<T extends Record<string, AbstractControl>> {
 
   //private _controls: T = null;
   private _controls = ref<T>(null)
