@@ -18,7 +18,7 @@ export const formControlDirective = {
   install: (app: App<any>) => {
     app.directive('form-control', {
       mounted: (el: HTMLElement & { bindingValue: any }, binding: DirectiveBinding, vnode: VNode, oldVnode) => {
-        if (!(el?.hasOwnProperty("value"))) return;
+        if (("value" in el) === false) return;
         const bindingValue = binding.value;
         isAbstractControl(bindingValue);
         el.bindingValue = bindingValue;
