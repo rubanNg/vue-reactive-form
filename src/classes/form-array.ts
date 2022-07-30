@@ -9,14 +9,9 @@ export class FormArray extends AbstractControl {
 
   private _controls: Array<AbstractControl> = [];
   private _errors: ValidationErrors | null = null;
-  private _validators: ValidationFn[] = [];
 
-  get validators(): ValidationFn[] {
-    return this._validators;
-  }
   dirty: boolean = false;
-  form: ReactiveForm<any> = null;
-
+  parent: AbstractControl = null;
 
   get controls() {
     return this._controls;
@@ -35,42 +30,20 @@ export class FormArray extends AbstractControl {
   }
 
   constructor(controls: Array<AbstractControl>, validators: ValidationFn[] = []) {
-    super();
-    this._validators = validators;
-    this.configureControls([...controls]);
-    console.log("CREATE ARRAY ", controls)
+    super(validators);
+    this.configureControls(controls);
   }
 
   setDirty(value: boolean) {
     this.dirty = value
   }
-
-  setValidators(validators: ValidationFn | ValidationFn[]) {
-    this._validators = Array.isArray(validators) ? validators : [validators]
-  }
-
-  addValidators(validators: ValidationFn | ValidationFn[]) {
-    this.validators.push(...toArray(validators));
-  }
-
-  removeValidators(validators: ValidationFn | ValidationFn[]) {
-    this._validators = this.validators.filter(s => !toArray(validators).includes(s))
-  }
   
-  clearValidators(): void {
-    this._validators = [];
-  }
-
-  getError(errorCode: string) {
-    return this.errors?.[errorCode];
-  }
-  
-  hasError(errorCode: string) {
-    return Boolean(this.errors?.hasOwnProperty(errorCode));
-  }
-
-  get(path: string) {
-    return findControl(this, path)
+  hasError(errorCode: string, path?: string) {
+    let errors = {};
+    if (path) {
+      errors = (this.get(path)?.errors || {});
+    } else errors = this._errors;
+    return errorCode in errors;
   }
 
   setControls(controls: Array<AbstractControl>) {
@@ -89,6 +62,13 @@ export class FormArray extends AbstractControl {
 
   setValue(value: any[] | { index: number, value: any }[]): void {
     this.updateValue(value);
+  }
+
+  setForm(form: ReactiveForm) {
+    super.setForm(form);
+    for (const control of this._controls) {
+      control.setForm(form);
+    }
   }
 
   private updateValue(value: any[] | { index: number, value: any }[]) {
@@ -113,7 +93,6 @@ export class FormArray extends AbstractControl {
     this._controls[index].value = value;  
   }
 
-
   private validate() {
     for (const validator of this.validators) {
       const error = validator(this);
@@ -136,7 +115,7 @@ export class FormArray extends AbstractControl {
 
   private configureControls(controls: Array<AbstractControl>) {
     for (const control of controls) {
-      control.form = this.form;
+      control.parent = this;
     }
     this._controls.push(...controls);
     defineProperties(this);

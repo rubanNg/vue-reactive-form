@@ -10,28 +10,17 @@ export class FormGroup<ListControlNames extends Record<string, AbstractControl> 
 
   private _controls: Record<string, AbstractControl> = {};
   private _errors: ValidationErrors | null = null;
-  private _validators: ValidationFn[] = [];
 
   dirty: boolean = false;
-  form: ReactiveForm<any> = null;
+  parent: AbstractControl = null;
 
-  get validators(): ValidationFn[] {
-    return this._validators;
-  }
-  
-  get controls() {
-    return this._controls as ListControlNames;
-  }
-  
+  get errors() { return this._errors; }
+  get controls() { return this._controls as ListControlNames; }
   get valid() {
     for (const controlName in this._controls.value) {
       if (!this._controls[controlName].valid) return false;
     }
     return this.validate();
-  }
-
-  get errors() {
-    return this._errors;
   }
 
   get value() {
@@ -44,41 +33,20 @@ export class FormGroup<ListControlNames extends Record<string, AbstractControl> 
   }
 
   constructor(controls: ListControlNames, validators: ValidationFn[] = []) {
-    super();
-    this._validators = validators;
+    super(validators);
     this.configureControls(controls);
   }
 
   setDirty(value: boolean) {
     this.dirty = value
   }
-
-  setValidators(validators: ValidationFn | ValidationFn[]) {
-    this._validators = Array.isArray(validators) ? validators : [validators]
-  }
-
-  addValidators(validators: ValidationFn | ValidationFn[]) {
-    this._validators.push(...toArray(validators));
-  }
-
-  removeValidators(validators: ValidationFn | ValidationFn[]) {
-    this._validators = this.validators.filter(s => !toArray(validators).includes(s))
-  }
-  
-  clearValidators(): void {
-    this._validators = [];
-  }
-
-  getError(errorCode: string) {
-    return this.errors?.[errorCode];
-  }
   
   hasError(errorCode: string, path?: string) {
-    return Boolean(this.errors?.hasOwnProperty(errorCode))
-  }
-
-  get(path: string) {
-    return findControl(this, path)
+    let errors = {};
+    if (path) {
+      errors = (this.get(path)?.errors || {});
+    } else errors = this._errors;
+    return errorCode in errors;
   }
 
   setControls(controls: Record<string, AbstractControl>) {
@@ -91,6 +59,13 @@ export class FormGroup<ListControlNames extends Record<string, AbstractControl> 
     }
   }
 
+  setForm(form: ReactiveForm) {
+    super.setForm(form);
+    for (const control in this._controls) {
+      this._controls[control].setForm(form);
+    }
+  }
+  
   setValue(values: Array<any> = []): void {
     this.updateValue(values);
   }
@@ -128,7 +103,7 @@ export class FormGroup<ListControlNames extends Record<string, AbstractControl> 
   private configureControls(controls: Record<string, AbstractControl>) {
     for (const controlName in controls) {
       this._controls[controlName] = controls[controlName];
-      this._controls[controlName].form = this.form;
+      this._controls[controlName].parent = this;
     }
     defineProperties(this);
   }

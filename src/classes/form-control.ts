@@ -5,19 +5,12 @@ import { AbstractControl } from "./abstract-conrol";
 
 export class FormControl extends AbstractControl {
 
-
-  private _value: string = null;
+  private _value: any = null;
   private _errors: ValidationErrors = null;
-  private _validators: ValidationFn[] = [];
   private _listiners: ((event: string) => void)[] = [];
 
-  form: ReactiveForm<any> = null;
+  parent: AbstractControl = null;
   dirty: boolean = false;
-
-
-  get validators(): ValidationFn[] {
-    return this._validators;
-  }
 
   get errors(): ValidationErrors  {
     return this._errors;
@@ -37,9 +30,8 @@ export class FormControl extends AbstractControl {
   }
 
   constructor(value: any, validators: ValidationFn[] = []) {
-    super();
+    super(validators);
     this._value = value || null;
-    this._validators = validators;
   }
 
   /**
@@ -61,44 +53,34 @@ export class FormControl extends AbstractControl {
   setValue(value: any) {
     this.value = value;
   }
-
-  setValidators(validators: ValidationFn | ValidationFn[]) {
-    this._validators = Array.isArray(validators) ? validators : [validators]
-  }
-
-  addValidators(validators: ValidationFn | ValidationFn[]) {
-    this.validators.push(...toArray(validators));
-  }
-
-  removeValidators(validators: ValidationFn | ValidationFn[]) {
-    this._validators = this.validators.filter(s => !toArray(validators).includes(s))
-  }
-  
-  clearValidators(): void {
-    this._validators = [];
-  }
   
   hasError(errorCode: string) {
-    return Boolean(this._errors?.hasOwnProperty(errorCode))
+    return errorCode in (this._errors || {});
   }
 
   setDirty(value: boolean) {
     this.dirty = value;
   }
 
+  setForm(form: ReactiveForm) {
+    super.setForm(form);
+  }
+
   private validate() {
+    let isValid: boolean = true;
+    this._errors = null;
     for (const validator of this.validators) {
       const error = validator(this);
       if (error !== null) {
+        isValid = false;
         this._errors = {
           ...this._errors,
           ...error,
         }
-        return false;
       }
     }
-    this._errors = null;
-    return true;
+    if (isValid) this._errors = null;
+    return isValid;
   }
 
   private onChange() {

@@ -1,7 +1,7 @@
 import { AbstractControl } from "../classes/abstract-conrol";
 
 
-export function toArray(value: any | any[]) {
+export function toArray<T>(value: T | T[]) {
   return Array.isArray(value) ? value : [value];
 }
 
@@ -19,12 +19,14 @@ export function defineProperties(target: any) {
 }
 
 export function findControl(parent: any, path: string): AbstractControl {
-  let value = null;
+  let value = parent;
   for (const segment of path.split(".")) {
     value = (value || parent);
     if (value[segment]) {
       value = value[segment];
-    } else break;
+    } else {
+      return null;
+    };
   }
   return value;
 }

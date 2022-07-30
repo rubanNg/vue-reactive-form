@@ -2,15 +2,15 @@ import { AbstractControl } from "./abstract-conrol";
 import { defineProperties, findControl } from "../utils";
 import { ref } from "vue";
 
-export class ReactiveForm<T extends Record<string, AbstractControl>> {
 
-  //private _controls: T = null;
-  private _controls = ref<T>(null)
+export class ReactiveForm {
 
-  get controls(): T { return this._controls.value; }
+  private _controls = ref<Record<string, AbstractControl>>(null)
+
+  get controls() { return this._controls.value; }
   get value() { return this.getValue(); }
 
-  constructor(controls: T) {
+  constructor(controls: Record<string, AbstractControl>) {
     this.configureControls(controls)
   }
 
@@ -25,9 +25,9 @@ export class ReactiveForm<T extends Record<string, AbstractControl>> {
     }, {} as Record<any, any>)
   }
 
-  private configureControls(controls: T) {
+  private configureControls(controls: Record<string, AbstractControl>) {
     for (const controlName in controls) {
-      controls[controlName].form = this;
+      controls[controlName].setForm(this);
     }
     this._controls.value = controls;
     defineProperties(this);
