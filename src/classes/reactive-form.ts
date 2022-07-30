@@ -26,6 +26,9 @@ export class ReactiveForm<T extends Record<string, AbstractControl>> {
   }
 
   private configureControls(controls: T) {
+    for (const controlName in controls) {
+      controls[controlName].form = this;
+    }
     this._controls.value = controls;
     defineProperties(this);
   }

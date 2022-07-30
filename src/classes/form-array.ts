@@ -1,4 +1,5 @@
 
+import { ReactiveForm } from "..";
 import { ValidationErrors, ValidationFn } from "../types";
 import { toArray, findControl, defineProperties } from "../utils";
 import { AbstractControl } from "./abstract-conrol";
@@ -14,7 +15,7 @@ export class FormArray extends AbstractControl {
     return this._validators;
   }
   dirty: boolean = false;
-  parent: AbstractControl = null;
+  form: ReactiveForm<any> = null;
 
 
   get controls() {
@@ -135,7 +136,7 @@ export class FormArray extends AbstractControl {
 
   private configureControls(controls: Array<AbstractControl>) {
     for (const control of controls) {
-      control.parent = this as AbstractControl;
+      control.form = this.form;
     }
     this._controls.push(...controls);
     defineProperties(this);

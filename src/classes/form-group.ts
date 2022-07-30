@@ -1,4 +1,5 @@
 import { ref } from "vue";
+import { ReactiveForm } from "..";
 import { ValidationErrors, ValidationFn } from "../types";
 import { toArray, findControl, defineProperties } from "../utils";
 import { AbstractControl } from "./abstract-conrol";
@@ -12,7 +13,7 @@ export class FormGroup<ListControlNames extends Record<string, AbstractControl> 
   private _validators: ValidationFn[] = [];
 
   dirty: boolean = false;
-  parent: AbstractControl = null;
+  form: ReactiveForm<any> = null;
 
   get validators(): ValidationFn[] {
     return this._validators;
@@ -127,7 +128,7 @@ export class FormGroup<ListControlNames extends Record<string, AbstractControl> 
   private configureControls(controls: Record<string, AbstractControl>) {
     for (const controlName in controls) {
       this._controls[controlName] = controls[controlName];
-      this._controls[controlName].parent = this;
+      this._controls[controlName].form = this.form;
     }
     defineProperties(this);
   }

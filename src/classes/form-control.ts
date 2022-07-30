@@ -1,3 +1,4 @@
+import { ReactiveForm } from "..";
 import { ValidationErrors, ValidationFn } from "../types";
 import { toArray } from "../utils";
 import { AbstractControl } from "./abstract-conrol";
@@ -10,7 +11,7 @@ export class FormControl extends AbstractControl {
   private _validators: ValidationFn[] = [];
   private _listiners: ((event: string) => void)[] = [];
 
-  parent: AbstractControl = null;
+  form: ReactiveForm<any> = null;
   dirty: boolean = false;
 
 

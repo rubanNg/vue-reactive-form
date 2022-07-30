@@ -1,3 +1,4 @@
+import { ReactiveForm } from "..";
 import { ValidationErrors, ValidationFn } from "../types";
 
 
@@ -10,7 +11,7 @@ export abstract class AbstractControl {
   abstract value: any;
   abstract dirty: boolean;
   abstract valid: boolean;
-  abstract parent: AbstractControl | null;
+  abstract form: ReactiveForm<any> | null;
   abstract errors: ValidationErrors | null;
   abstract setValue(value: any): void;
   abstract setDirty(value: boolean): void;
