@@ -51,6 +51,9 @@ Reactive vue forms
   //update geo
   // controls as array
   const [control1, control2] = form.get("adress.geo").controls;
+  const control1 = form.get("adress.geo.0");
+  const control2 = form.get("adress.geo.1");
+  const [-37.3159, 81.1496] = form.get("adress.geo").value;
 
 
 
