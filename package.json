@@ -1,10 +1,10 @@
 {
   "name": "reactive-vue-form",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "description": "",
   "main": "./dist/index.js",
   "scripts": {
-    "pub": "webpack"
+    "build": "webpack"
   },
   "keywords": [],
   "repository": {
@@ -14,25 +14,13 @@
   "author": "ruban",
   "license": "ISC",
   "devDependencies": {
-    "@babel/core": "^7.18.9",
-    "babel-loader": "^8.2.5",
-    "vue": "^3.2.37",
     "ts-loader": "^9.3.1",
     "typescript": "^4.7.4",
     "webpack": "^5.73.0",
-    "webpack-cli": "^4.10.0",
-    "@typescript-eslint/eslint-plugin": "^4.18.0",
-    "@typescript-eslint/parser": "^4.18.0",
-    "@vue/cli-plugin-babel": "~4.5.13",
-    "@vue/cli-plugin-eslint": "~4.5.13",
-    "@vue/cli-plugin-router": "~4.5.13",
-    "@vue/cli-plugin-typescript": "~4.5.13",
-    "@vue/cli-plugin-vuex": "~4.5.13",
-    "@vue/cli-service": "~4.5.13",
-    "@vue/compiler-sfc": "^3.0.0",
-    "@vue/eslint-config-typescript": "^7.0.0",
-    "eslint": "^6.7.2",
-    "eslint-plugin-vue": "^7.0.0"
+    "webpack-cli": "^4.10.0"
+  },
+  "peerDependencies": {
+    "vue": "^3.2.0"
   },
   "files": [
     "dist"
