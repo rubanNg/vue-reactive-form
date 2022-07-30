@@ -82,3 +82,30 @@ Reactive vue forms
     <span v-if="form.user.hasError('nameEqualError')">Error text here</span>
   </template>
 ```
+
+
+```html
+  <h1>Can also be used as a directive</h1>
+```
+
+```javascript
+  //main.js
+  import { formControlDirective } from './directive'
+  const app = createApp(App);
+  app.use(formControlDirective);
+
+  // inside component
+
+
+  //App.vue
+  const form = new ReactiveForm({
+    name: new FormControl(),
+    option: new FormControl(3)
+  })
+
+  <input v-form-control="form.name" type="text">
+  <select v-form-control="form.option">
+    <option v-for="value in [1, 2, 3]" :key="value" :value="value">{{ value }}</option>
+  </select>
+
+```
