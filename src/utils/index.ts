@@ -28,3 +28,8 @@ export function findControl(parent: any, path: string): AbstractControl {
   }
   return value;
 }
+
+
+export function isPromise(value: any) {
+  return typeof value === 'function' &&  typeof value.then === 'function' && typeof value.catch === 'function';
+}

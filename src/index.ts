@@ -3,7 +3,7 @@ import { FormArray } from "./classes/form-array";
 import { FormControl } from "./classes/form-control";
 import { FormGroup } from "./classes/form-group";
 import { ReactiveForm } from "./classes/reactive-form";
-import { formControlDirective } from "./directives/formControl";
+import { formControlDirective } from "./directives/form-control.directive";
 
 export {
   ReactiveForm,

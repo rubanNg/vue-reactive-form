@@ -42,7 +42,6 @@ export class FormControl extends AbstractControl {
   }
 
   /**
-   * 
    * @param listener emit on every value change
    * @returns unsubscribe function
    */

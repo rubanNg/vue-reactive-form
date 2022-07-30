@@ -7,9 +7,8 @@ import { AbstractControl } from "./abstract-conrol";
 
 export class FormGroup<ListControlNames extends Record<string, AbstractControl> = any> extends AbstractControl {
 
-  private _controls: Record<string, AbstractControl>;
+  private _controls: Record<string, AbstractControl> = {};
   private _errors: ValidationErrors | null = null;
-  private _value: any[] = [];
   private _validators: ValidationFn[] = [];
 
   dirty: boolean = false;
@@ -18,8 +17,7 @@ export class FormGroup<ListControlNames extends Record<string, AbstractControl> 
   get validators(): ValidationFn[] {
     return this._validators;
   }
-
-
+  
   get controls() {
     return this._controls as ListControlNames;
   }
@@ -36,21 +34,18 @@ export class FormGroup<ListControlNames extends Record<string, AbstractControl> 
   }
 
   get value() {
-    const keys = Object.keys(Object(this._controls));
+    const keys = Object.keys(this._controls);
+    const result: Record<any, any> = {};
     return keys.reduce((result, controlName) => {
       result[controlName] = this._controls[controlName].value;
       return result;
-    }, {} as Record<string, string>)
+    }, result)
   }
 
   constructor(controls: ListControlNames, validators: ValidationFn[] = []) {
     super();
     this._validators = validators;
     this.configureControls(controls);
-  }
-
-  setValue(values: Array<any> = []): void {
-    this.updateValue(values);
   }
 
   setDirty(value: boolean) {
@@ -89,18 +84,21 @@ export class FormGroup<ListControlNames extends Record<string, AbstractControl> 
     this.configureControls({ ...controls })
   }
 
-  reset(value: Record<any, any>) {
-    for (const controlName in this._controls) {
-      this._controls[controlName].setValue(value?.[controlName] || null);
+  reset() {
+    for (const control in this._controls) {
+      this._controls[control].value = null;
     }
   }
 
-  private updateValue(values: any[]) {
-    if (!values || values?.length === 0) {
-      this._value = [];
-    } else {
-      for (const [index, value] of values.entries()) {
-        this._value[index] = value;
+  setValue(values: Array<any> = []): void {
+    this.updateValue(values);
+  }
+
+  private updateValue(value: Record<any, any>[]) {
+    const reset = (!value || Object.keys(value?.length).length === 0);
+    for (const controlName in value) {
+      if (this._controls?.[controlName]) {
+        this._controls[controlName].value = reset ? null : value[controlName];
       }
     }
     this.onChange()

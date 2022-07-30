@@ -10,19 +10,11 @@ function updateModel(event: Event) {
   element.bindingValue.value = element.value;
 }
 
-function isAbstractControl(value: any) {
-  if (!(value instanceof AbstractControl)) {
-    throw new Error("v-form-control directive value must be AbstractControl instance");
-  }
-}
-
-
 export const formControlDirective = {
   install: (app: App<any>) => {
     app.directive('form-control', {
       mounted: (element: HTMLElement & { value?: any, bindingValue: AbstractControl }, binding: DirectiveBinding, vnode: VNode, oldVnode) => {
         if (("value" in element) === false) return;
-        isAbstractControl(binding.value);
         element.bindingValue = binding.value;
         element.addEventListener('input', updateModel);
         removeListener = (element.bindingValue as FormControl).detectChange((value) => {

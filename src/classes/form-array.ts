@@ -8,7 +8,6 @@ export class FormArray extends AbstractControl {
 
   private _controls: Array<AbstractControl> = [];
   private _errors: ValidationErrors | null = null;
-  private _value: any[] = [];
   private _validators: ValidationFn[] = [];
 
   get validators(): ValidationFn[] {
@@ -41,9 +40,6 @@ export class FormArray extends AbstractControl {
     console.log("CREATE ARRAY ", controls)
   }
 
-  setValue(values: Array<any> = []): void {
-    this.updateValue(values);
-  }
   setDirty(value: boolean) {
     this.dirty = value
   }
@@ -84,21 +80,36 @@ export class FormArray extends AbstractControl {
     this.controls.splice(index, 1);
   }
 
-  reset(value: any[]) {
-    for (const [index, control] of this._controls.entries()) {
-      control.setValue(value?.[index] || null);
+  reset() {
+    for (const control of this._controls) {
+      control.value = null;
     }
   }
 
-  private updateValue(values: any[]) {
-    if (!values || values?.length === 0) {
-      this._value = [];
+  setValue(value: any[] | { index: number, value: any }[]): void {
+    this.updateValue(value);
+  }
+
+  private updateValue(value: any[] | { index: number, value: any }[]) {
+    if(!value || value?.length === 0) {
+      this.reset();
     } else {
-      for (const [index, value] of values.entries()) {
-        this._value[index] = value;
+      for (let index = 0; index < value.length; index++) {
+        // если массив бошльше чем полей в  массиве
+        if (index > this._controls.length - 1) break;
+        const needUpdateByIndex = (value?.[index]?.index !== null) && (value?.[index]?.index !== undefined);
+        if (needUpdateByIndex) this.updateByIndex(value[index]);
+        else {
+          this._controls[index].value = value[index];
+        }
       }
     }
+
     this.onChange()
+  }
+
+  private updateByIndex({ index, value }: { index: number, value: any }) {
+    this._controls[index].value = value;  
   }
 
 
