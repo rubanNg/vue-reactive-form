@@ -27,7 +27,11 @@ Reactive vue forms
              -37.3159,
              81.1496
           ]
-       }
+       },
+       "contacts": {
+          "phone": "1-770-736-8031 x56442",
+          "website": "hildegard.org",
+        }
     }
     */
     contacts: new FormGroup({
