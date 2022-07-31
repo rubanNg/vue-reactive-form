@@ -34,10 +34,6 @@ Reactive vue forms
         }
     }
     */
-    contacts: new FormGroup({
-      phone: new FormControl("1-770-736-8031 x56442"),
-      website: new FormControl("hildegard.org"),
-    })
   }
   const form = new ReactiveForm({
     user: new FormGroup({
