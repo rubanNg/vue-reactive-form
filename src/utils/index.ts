@@ -31,7 +31,29 @@ export function findControl(parent: any, path: string): AbstractControl {
   return value;
 }
 
+export function toRecord(value: any): Record<string, any> {
+  if (isObject(value)) return value as Record<string, any>;
+  if (isArray(value)) {
+    return value.reduce((result: any, arrayValue: any, index: number) => {
+      result[index] = arrayValue;
+      return result;
+    }, {} as Record<string, any>)
+  }
+  // isPrimitive
+  return {};
+  
+}
+
 
 export function isPromise(value: any) {
   return typeof value === 'function' &&  typeof value.then === 'function' && typeof value.catch === 'function';
+}
+
+
+export function isArray(value: any) {
+  return toString.call(value) === "[object Array]"
+}
+
+export function isObject(value: any) {
+  return toString.call(value) === "[object Object]"
 }

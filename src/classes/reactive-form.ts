@@ -1,6 +1,7 @@
 import { AbstractControl } from "./abstract-conrol";
-import { defineProperties, findControl } from "../utils";
+import { defineProperties, findControl, isObject, toRecord } from "../utils";
 import { ref } from "vue";
+import { ArrayState, ObjectState } from "../types";
 
 
 export class ReactiveForm {
@@ -10,7 +11,7 @@ export class ReactiveForm {
   get controls() { return this._controls.value; }
   get value() { return this.getValue(); }
 
-  constructor(controls: Record<string, AbstractControl>) {
+  constructor(controls: ArrayState | ObjectState) {
     this.configureControls(controls)
   }
 
@@ -19,18 +20,18 @@ export class ReactiveForm {
   }
 
   private getValue() {
-    return Object.keys(this._controls.value).reduce((result, key) => {
-      result[key] = this._controls.value[key].value;
-      return result;
-    }, {} as Record<any, any>)
+    const formValue: Record<string, any> = {};
+    for (const name in this._controls.value) {
+      formValue[name] = this._controls.value[name].value;
+    }
+    return formValue;
   }
 
-  private configureControls(controls: Record<string, AbstractControl>) {
-    for (const controlName in controls) {
-      controls[controlName].setForm(this);
+  private configureControls(controls: ArrayState | ObjectState) {
+    this._controls.value = toRecord(controls);
+    for (const name in this._controls.value) {
+      this._controls.value[name].setForm(this);
     }
-    this._controls.value = controls;
     defineProperties(this);
   }
-
 }

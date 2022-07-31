@@ -5,9 +5,11 @@ import { findControl, toArray } from "../utils";
 
 export abstract class AbstractControl {
 
+  private _errors: ValidationErrors = null;
   private _form: ReactiveForm = null;
   private _validators: ValidationFn[] = [];
 
+  get errors(): ValidationErrors  { return this._errors; };
   get validators(): ValidationFn[] { return this._validators; }
   get form() { return this._form; }
 
@@ -23,46 +25,61 @@ export abstract class AbstractControl {
     return findControl(this, path)
   }
   
-  setValidators(validators: ValidationFn | ValidationFn[]) {
-    this._validators = Array.isArray(validators) ? validators : [validators]
+  setValidators(validators: ValidationFn | ValidationFn[], emitValidation: boolean = false) {
+    this._validators = toArray(validators);
+    emitValidation && this.validate();
   }
 
-  addValidators(validators: ValidationFn | ValidationFn[]) {
-    for (const validator of toArray(validators)) {
-      if (this._validators.some(s => s === validator || s.name === validator.name)) {
-        continue;
-      };
-      this._validators.push(validator); 
+  addValidators(validators: ValidationFn | ValidationFn[], emitValidation: boolean = false) {
+    const distinct = this.distinctValidators(toArray(validators));
+    this._validators.push(...distinct);
+    emitValidation && this.validate();
+  }
+
+  removeValidators(validators: ValidationFn | ValidationFn[], emitValidation: boolean = false) {
+    this._validators = this._validators.filter(validator => {
+      return toArray(validators).some(s => s === validator || s.name === validator.name) ? false : true;
+    });
+    emitValidation && this.validate();
+  }
+  
+  clearValidators(emitValidation: boolean = false) {
+    this._validators = [];
+    emitValidation && this.validate();
+  }
+
+  hasError(errorCode: string) {
+    return errorCode in (this._errors || {});
+  }
+
+  validate() {
+    let errors: {} = null;
+    for (const validator of this.validators) {
+      const error = validator(this) || null;
+      if (error !== null) {
+        errors = { ...errors, ...error }
+      }
     }
+    this._errors = errors;
+    return this._errors === null;
   }
 
-  removeValidators(validators: ValidationFn | ValidationFn[]) {
-    const newValidators: ValidationFn[] = [];
+  private distinctValidators (validators: ValidationFn[]) {
+    const unique: ValidationFn[] = [];
     for (const validator of toArray(validators)) {
       if (this._validators.some(s => s === validator || s.name === validator.name)) {
         continue;
       }
-      newValidators.push(validator);
+      unique.push(validator);
     }
-    this._validators = newValidators;
+    return unique;
   }
   
-  clearValidators(): void {
-    this._validators = [];
-  }
-  
-  //abstract validators: ValidationFn[]; 
   abstract value: any;
   abstract dirty: boolean;
   abstract valid: boolean;
   abstract parent: AbstractControl | null;
-  abstract errors: ValidationErrors | null;
   abstract setValue(value: any): void;
   abstract setDirty(value: boolean): void;
-  // abstract setValidators(validators: ValidationFn | ValidationFn[]): void;
-  // abstract addValidators(validators: ValidationFn | ValidationFn[]): void;
-  // abstract removeValidators(validators: ValidationFn | ValidationFn[]): void;
-  // abstract clearValidators(): void;
-  abstract hasError(errorCode: string): boolean;
   abstract reset(value: any): void;
 }

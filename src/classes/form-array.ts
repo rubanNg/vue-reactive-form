@@ -8,7 +8,6 @@ import { AbstractControl } from "./abstract-conrol";
 export class FormArray extends AbstractControl {
 
   private _controls: Array<AbstractControl> = [];
-  private _errors: ValidationErrors | null = null;
 
   dirty: boolean = false;
   parent: AbstractControl = null;
@@ -18,11 +17,7 @@ export class FormArray extends AbstractControl {
   }
   
   get valid() {
-    return this._controls.every(s => s.valid) && this.validate();
-  }
-
-  get errors() {
-    return this._errors;
+    return this._controls.some(s => !s.valid) ? false : this.validate();
   }
 
   get value() {
@@ -36,14 +31,6 @@ export class FormArray extends AbstractControl {
 
   setDirty(value: boolean) {
     this.dirty = value
-  }
-  
-  hasError(errorCode: string, path?: string) {
-    let errors = {};
-    if (path) {
-      errors = (this.get(path)?.errors || {});
-    } else errors = this._errors;
-    return errorCode in errors;
   }
 
   setControls(controls: Array<AbstractControl>) {
@@ -91,22 +78,6 @@ export class FormArray extends AbstractControl {
 
   private updateByIndex({ index, value }: { index: number, value: any }) {
     this._controls[index].value = value;  
-  }
-
-  private validate() {
-    for (const validator of this.validators) {
-      const error = validator(this);
-      if (error !== null) {
-        this._errors = {
-          ...(this._errors || {}),
-          ...error,
-        }
-
-        return false;
-      }
-    }
-    this._errors = null;
-    return true;
   }
 
   private onChange() {

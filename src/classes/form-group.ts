@@ -9,12 +9,10 @@ import { AbstractControl } from "./abstract-conrol";
 export class FormGroup<ListControlNames extends Record<string, AbstractControl> = any> extends AbstractControl {
 
   private _controls: Record<string, AbstractControl> = {};
-  private _errors: ValidationErrors | null = null;
 
   dirty: boolean = false;
   parent: AbstractControl = null;
 
-  get errors() { return this._errors; }
   get controls() { return this._controls as ListControlNames; }
   get valid() {
     for (const controlName in this._controls.value) {
@@ -39,14 +37,6 @@ export class FormGroup<ListControlNames extends Record<string, AbstractControl> 
 
   setDirty(value: boolean) {
     this.dirty = value
-  }
-  
-  hasError(errorCode: string, path?: string) {
-    let errors = {};
-    if (path) {
-      errors = (this.get(path)?.errors || {});
-    } else errors = this._errors;
-    return errorCode in errors;
   }
 
   setControls(controls: Record<string, AbstractControl>) {
@@ -78,22 +68,6 @@ export class FormGroup<ListControlNames extends Record<string, AbstractControl> 
       }
     }
     this.onChange()
-  }
-
-  private validate() {
-    for (const validator of this.validators) {
-      const error = validator(this);
-      if (error !== null) {
-        this._errors = {
-          ...(this._errors || {}),
-          ...error,
-        }
-
-        return false;
-      }
-    }
-    this._errors = null;
-    return true;
   }
 
   private onChange() {
