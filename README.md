@@ -12,6 +12,29 @@ Reactive vue forms
   import { FormGroup } from 'reactive-vue-form';
 
 
+    /*
+    {
+       "user":{
+          "name":{
+             "first":null,
+             "second":"secondName"
+          },
+          "age":10
+       },
+       "adress":{
+          "street":"Kulal",
+          "geo":[
+             -37.3159,
+             81.1496
+          ]
+       }
+    }
+    */
+    contacts: new FormGroup({
+      phone: new FormControl("1-770-736-8031 x56442"),
+      website: new FormControl("hildegard.org"),
+    })
+  }
   const form = new ReactiveForm({
     user: new FormGroup({
       name: new FormGroup({
@@ -54,6 +77,15 @@ Reactive vue forms
   const control1 = form.get("adress.geo.0");
   const control2 = form.get("adress.geo.1");
   const [-37.3159, 81.1496] = form.get("adress.geo").value;
+  
+  /*
+  [
+    null,
+  ]
+  */
+  const arrayForm = new ReactiveForm([
+    new FormControl(null)
+  ]);
 
 
 
