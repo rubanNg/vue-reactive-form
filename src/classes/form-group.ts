@@ -1,38 +1,38 @@
 import { ref } from "vue";
 import { ReactiveForm } from "..";
 import { ValidationErrors, ValidationFn } from "../types";
-import { toArray, findControl, defineProperties } from "../utils";
+import { wrapToArray, findControl, defineProperties } from "../utils";
 import { AbstractControl } from "./abstract-conrol";
 
 
 
 export class FormGroup<ListControlNames extends Record<string, AbstractControl> = any> extends AbstractControl {
 
-  private _controls: Record<string, AbstractControl> = {};
+  #_controls: Record<string, AbstractControl> = {};
 
   dirty: boolean = false;
   parent: AbstractControl = null;
 
-  get controls() { return this._controls as ListControlNames; }
+  get controls() { return this.#_controls as ListControlNames; }
   get valid() {
-    for (const controlName in this._controls.value) {
-      if (!this._controls[controlName].valid) return false;
+    for (const controlName in this.#_controls.value) {
+      if (!this.#_controls[controlName].valid) return false;
     }
     return this.validate();
   }
 
   get value() {
-    const keys = Object.keys(this._controls);
+    const keys = Object.keys(this.#_controls);
     const result: Record<any, any> = {};
     return keys.reduce((result, controlName) => {
-      result[controlName] = this._controls[controlName].value;
+      result[controlName] = this.#_controls[controlName].value;
       return result;
     }, result)
   }
 
   constructor(controls: ListControlNames, validators: ValidationFn[] = []) {
     super(validators);
-    this.configureControls(controls);
+    this.#configureControls(controls);
   }
 
   setDirty(value: boolean) {
@@ -40,44 +40,44 @@ export class FormGroup<ListControlNames extends Record<string, AbstractControl> 
   }
 
   setControls(controls: Record<string, AbstractControl>) {
-    this.configureControls({ ...controls })
+    this.#configureControls({ ...controls })
   }
 
   reset() {
-    for (const control in this._controls) {
-      this._controls[control].value = null;
+    for (const control in this.#_controls) {
+      this.#_controls[control].value = null;
     }
   }
 
   setForm(form: ReactiveForm) {
     super.setForm(form);
-    for (const control in this._controls) {
-      this._controls[control].setForm(form);
+    for (const control in this.#_controls) {
+      this.#_controls[control].setForm(form);
     }
   }
   
   setValue(values: Array<any> = []): void {
-    this.updateValue(values);
+    this.#updateValue(values);
   }
 
-  private updateValue(value: Record<any, any>[]) {
+  #updateValue(value: Record<any, any>[]) {
     const reset = (!value || Object.keys(value?.length).length === 0);
     for (const controlName in value) {
-      if (this._controls?.[controlName]) {
-        this._controls[controlName].value = reset ? null : value[controlName];
+      if (this.#_controls?.[controlName]) {
+        this.#_controls[controlName].value = reset ? null : value[controlName];
       }
     }
-    this.onChange()
+    this.#onChange()
   }
 
-  private onChange() {
+  #onChange() {
     this.validate();
   }
 
-  private configureControls(controls: Record<string, AbstractControl>) {
+  #configureControls(controls: Record<string, AbstractControl>) {
     for (const controlName in controls) {
-      this._controls[controlName] = controls[controlName];
-      this._controls[controlName].parent = this;
+      this.#_controls[controlName] = controls[controlName];
+      this.#_controls[controlName].parent = this;
     }
     defineProperties(this);
   }

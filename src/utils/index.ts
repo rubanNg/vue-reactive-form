@@ -1,7 +1,7 @@
 import { AbstractControl } from "../classes/abstract-conrol";
 
 
-export function toArray<T>(value: T | T[]) {
+export function wrapToArray<T>(value: T | T[]) {
   return Array.isArray(value) ? value : [value];
 }
 
@@ -39,16 +39,20 @@ export function toRecord(value: any): Record<string, any> {
       return result;
     }, {} as Record<string, any>)
   }
-  // isPrimitive
   return {};
-  
 }
 
+export function toArray(value: any) {
+  if (isObject(value)) {
+    return Object.entries(value).map(([_, value]) => value);
+  }
+  if (isArray(value)) return value;
+  return [value];
+}
 
 export function isPromise(value: any) {
   return typeof value === 'function' &&  typeof value.then === 'function' && typeof value.catch === 'function';
 }
-
 
 export function isArray(value: any) {
   return toString.call(value) === "[object Array]"
