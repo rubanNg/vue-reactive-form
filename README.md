@@ -6,10 +6,10 @@ Reactive vue forms
 
 <script lang="ts" setup>
   import { ref, onMounted } from 'vue'
-  import { ReactiveForm } from './context/reactive-form'
-  import { FormArray } from './context/form-array'
-  import { FormControl } from './context/form-control';
-  import { FormGroup } from './context/form-group';
+  import { ReactiveForm } from 'reactive-vue-form';
+  import { FormArray } from 'reactive-vue-form';
+  import { FormControl } from 'reactive-vue-form';
+  import { FormGroup } from 'reactive-vue-form';
 
 
   const form = new ReactiveForm({
