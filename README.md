@@ -1,13 +1,13 @@
 Reactive vue forms
 
 
-<a href="https://sleepy-bayou-98049.herokuapp.com/">
-  <h1>DEMO</h1>
-</a>
+<a href="https://sleepy-bayou-98049.herokuapp.com/">DEMO</a>
 
 <hr/>  
 
 <a href="https://github.com/rubanNg/todos-form">SOURCE</a>
+
+<hr/>  
 
 ```javascript
 
