@@ -5,8 +5,8 @@ import { AbstractControl } from "./abstract-conrol";
 
 export class FormControl extends AbstractControl {
 
-  #_value: any = null;
-  #_listiners: ((event: string) => void)[] = [];
+  private _value: any = null;
+  private _listiners: ((event: string) => void)[] = [];
 
   parent: AbstractControl = null;
   dirty: boolean = false;
@@ -17,17 +17,17 @@ export class FormControl extends AbstractControl {
   }
 
   get value() {
-    return this.#_value;
+    return this._value;
   }
 
   set value(value) {
-    this.#_value = value;
+    this._value = value;
     this.onChange();
   }
 
   constructor(value: any = null, validators: ValidationFn | ValidationFn[] = []) {
     super(wrapToArray(validators));
-    this.#_value = value || null;
+    this._value = value ?? null;
   }
 
   /**
@@ -35,10 +35,10 @@ export class FormControl extends AbstractControl {
    * @returns unsubscribe function
    */
   valueChange(listener: (value: string) => void) {
-    this.#_listiners.push(listener);
+    this._listiners.push(listener);
 
     return (() => {
-      this.#_listiners = this.#_listiners.filter(l => l !== listener);
+      this._listiners = this._listiners.filter(l => l !== listener);
     }).bind(this);
   }
 
@@ -60,7 +60,7 @@ export class FormControl extends AbstractControl {
 
 
   private onChange() {
-    this.#_listiners.forEach(listener => listener(this.#_value))
+    this._listiners.forEach(listener => listener(this._value))
     this.validate();
     !this.dirty && (this.dirty = true);
   }

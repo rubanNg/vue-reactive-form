@@ -1,3 +1,4 @@
+import { FormArray, FormGroup, ReactiveForm } from "..";
 import { AbstractControl } from "../classes/abstract-conrol";
 
 
@@ -12,10 +13,26 @@ export function defineProperties(target: any) {
     if (!existControl) {
       result[controlName] = {
         get: () => target.controls[controlName],
+        configurable: true,
+        enumerable: true,
       }
     }
   }
   Object.defineProperties(target, result);
+}
+
+export function defineProperty(target: any, controlName: string) {
+  Object.defineProperty(target, controlName, {
+    get: () => target.controls[controlName],
+    configurable: true,
+    enumerable: true,
+  });
+}
+
+export function undefineProperties(object: any, properties: string | string[]) {
+  for (const property of toArray(properties)) {
+    delete object[property]; 
+  }
 }
 
 export function find<T>(parent: any, path: string): T {
@@ -31,13 +48,13 @@ export function find<T>(parent: any, path: string): T {
   return value as T;
 }
 
-export function toRecord(value: any): Record<string, any> {
+export function toRecord<T = any>(value: any): Record<string, T> {
   if (isObject(value)) return value as Record<string, any>;
   if (isArray(value)) {
     return value.reduce((result: any, arrayValue: any, index: number) => {
       result[index] = arrayValue;
       return result;
-    }, {} as Record<string, any>)
+    }, {} as Record<string, T>)
   }
   return {};
 }
@@ -60,4 +77,19 @@ export function isArray(value: any): value is any[] {
 
 export function isObject(value: any): value is {} {
   return toString.call(value) === "[object Object]"
+}
+
+
+export function interceptControlsGetters<T>(object: any): T {
+  return new Proxy(object, {
+    get(target, property) {
+      if (property in target) {
+        [property, target, property in target]
+        return Reflect.get(target, property);
+      } else if (property in (target.controls || {})) {
+        [property, target.controls, property in target.controls]
+        return Reflect.get(target.controls, property);
+      } else return null;
+    }
+  })
 }
