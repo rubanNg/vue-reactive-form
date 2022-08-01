@@ -9,7 +9,7 @@ export class Validators {
   }
 
   static email(control: AbstractControl) {
-    const result = String(control.value || '').match(/[]/i);
+    const result =  /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/i.test(String(control.value || ''));
     if (!result) return { email: true }
     return null;
   }
