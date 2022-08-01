@@ -5,7 +5,9 @@ Reactive vue forms
   <h1>DEMO</h1>
 </a>
 
-<a href="https://github.com/rubanNg/todos-form">SOURCE</>
+<hr/>  
+
+<a href="https://github.com/rubanNg/todos-form">SOURCE</a>
 
 ```javascript
 
