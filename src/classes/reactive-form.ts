@@ -1,5 +1,5 @@
 import { AbstractControl } from "./abstract-conrol";
-import { defineProperties, findControl, isArray, toArray, toRecord } from "../utils";
+import { defineProperties, find, isArray, toArray, toRecord } from "../utils";
 import { ref } from "vue";
 import { ArrayState, ObjectState } from "../types";
 
@@ -19,7 +19,7 @@ export class ReactiveForm {
   }
 
   get(path: string) {
-    return findControl(this, path)
+    return find<AbstractControl>(this, path)
   }
 
   #getValue() {

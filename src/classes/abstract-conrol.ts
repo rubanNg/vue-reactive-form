@@ -1,6 +1,6 @@
 import { ReactiveForm } from "..";
 import { ValidationErrors, ValidationFn } from "../types";
-import { findControl, wrapToArray } from "../utils";
+import { find, wrapToArray } from "../utils";
 
 
 export abstract class AbstractControl {
@@ -22,7 +22,7 @@ export abstract class AbstractControl {
   }
 
   get(path: string) {
-    return findControl(this, path)
+    return find<AbstractControl>(this, path)
   }
   
   setValidators(validators: ValidationFn | ValidationFn[], emitValidation: boolean = false) {
@@ -48,8 +48,20 @@ export abstract class AbstractControl {
     emitValidation && this.validate();
   }
 
-  hasError(errorCode: string) {
-    return errorCode in (this.#_errors || {});
+  hasError(error: string, path?: string) {
+    if (path) return error in (this.get(path) ? this.get(path).#_errors : {});
+    return error in (this.#_errors || {});
+  }
+
+  setErrors(errors: ValidationErrors) {
+    this.#_errors = {
+      ...this.#_errors,
+      ...errors
+    }
+  }
+
+  getError(error: string, path?: string) {
+    return path ? find<ValidationErrors>(this.#_errors, path) : this.#_errors[error] || null;
   }
 
   validate() {
@@ -81,5 +93,5 @@ export abstract class AbstractControl {
   abstract parent: AbstractControl | null;
   abstract setValue(value: any): void;
   abstract setDirty(value: boolean): void;
-  abstract reset(value: any): void;
+  abstract reset(): void;
 }

@@ -1,7 +1,7 @@
 
 import { ReactiveForm } from "..";
 import { ValidationErrors, ValidationFn } from "../types";
-import { wrapToArray, findControl, defineProperties } from "../utils";
+import { wrapToArray, defineProperties } from "../utils";
 import { AbstractControl } from "./abstract-conrol";
 
 
@@ -24,8 +24,8 @@ export class FormArray extends AbstractControl {
     return this.#_controls.map(control => control.value);
   }
 
-  constructor(controls: Array<AbstractControl>, validators: ValidationFn[] = []) {
-    super(validators);
+  constructor(controls: Array<AbstractControl>, validators: ValidationFn | ValidationFn[] = []) {
+    super(wrapToArray(validators));
     this.#configureControls(controls);
   }
 
@@ -35,16 +35,6 @@ export class FormArray extends AbstractControl {
 
   setControls(controls: Array<AbstractControl>) {
     this.#configureControls(controls);
-  }
-
-  removeAt(index: number) {
-    this.controls.splice(index, 1);
-  }
-
-  reset() {
-    for (const control of this.#_controls) {
-      control.value = null;
-    }
   }
 
   setValue(value: any[] | { index: number, value: any }[]): void {
@@ -57,6 +47,23 @@ export class FormArray extends AbstractControl {
       control.setForm(form);
     }
   }
+
+  removeControl(index: number) {
+    this.#_controls.splice(index, 1);
+  }
+
+  contains(index: number) {
+    return Boolean(this.#_controls[index])
+  }
+
+  removeAt(index: number) {
+    this.controls.splice(index, 1);
+  }
+
+  reset() {
+    for (const control of this.#_controls) control.reset();
+  }
+
 
   #updateValue(value: any[] | { index: number, value: any }[]) {
     if(!value || value?.length === 0) {

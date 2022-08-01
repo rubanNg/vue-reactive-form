@@ -1,7 +1,7 @@
 import { ref } from "vue";
 import { ReactiveForm } from "..";
 import { ValidationErrors, ValidationFn } from "../types";
-import { wrapToArray, findControl, defineProperties } from "../utils";
+import { wrapToArray, defineProperties } from "../utils";
 import { AbstractControl } from "./abstract-conrol";
 
 
@@ -30,8 +30,8 @@ export class FormGroup<ListControlNames extends Record<string, AbstractControl> 
     }, result)
   }
 
-  constructor(controls: ListControlNames, validators: ValidationFn[] = []) {
-    super(validators);
+  constructor(controls: ListControlNames, validators: ValidationFn | ValidationFn[] = []) {
+    super(wrapToArray(validators));
     this.#configureControls(controls);
   }
 
@@ -43,12 +43,6 @@ export class FormGroup<ListControlNames extends Record<string, AbstractControl> 
     this.#configureControls({ ...controls })
   }
 
-  reset() {
-    for (const control in this.#_controls) {
-      this.#_controls[control].value = null;
-    }
-  }
-
   setForm(form: ReactiveForm) {
     super.setForm(form);
     for (const control in this.#_controls) {
@@ -58,6 +52,18 @@ export class FormGroup<ListControlNames extends Record<string, AbstractControl> 
   
   setValue(values: Array<any> = []): void {
     this.#updateValue(values);
+  }
+
+  removeControl(name: string) {
+    delete this.#_controls[name]
+  }
+
+  contains(name: string) {
+    return Boolean(this.#_controls[name])
+  }
+  
+  reset() {
+    for (const control in this.#_controls) this.#_controls[control].reset();
   }
 
   #updateValue(value: Record<any, any>[]) {

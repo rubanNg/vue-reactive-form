@@ -2,7 +2,7 @@ import { AbstractControl } from "../classes/abstract-conrol";
 
 
 export function wrapToArray<T>(value: T | T[]) {
-  return Array.isArray(value) ? value : [value];
+  return (isArray(value) ? value : [value]);
 }
 
 export function defineProperties(target: any) {
@@ -18,7 +18,7 @@ export function defineProperties(target: any) {
   Object.defineProperties(target, result);
 }
 
-export function findControl(parent: any, path: string): AbstractControl {
+export function find<T>(parent: any, path: string): T {
   let value = parent;
   for (const segment of path.split(".")) {
     value = (value || parent);
@@ -28,7 +28,7 @@ export function findControl(parent: any, path: string): AbstractControl {
       return null;
     };
   }
-  return value;
+  return value as T;
 }
 
 export function toRecord(value: any): Record<string, any> {
@@ -42,22 +42,22 @@ export function toRecord(value: any): Record<string, any> {
   return {};
 }
 
-export function toArray(value: any) {
+export function toArray<T = any>(value: any): T[] {
   if (isObject(value)) {
-    return Object.entries(value).map(([_, value]) => value);
+    return Object.entries(value).map(([_, value]) => value) as T[];
   }
-  if (isArray(value)) return value;
-  return [value];
+  if (isArray(value)) return value as T[];
+  return [value] as T[];
 }
 
 export function isPromise(value: any) {
-  return typeof value === 'function' &&  typeof value.then === 'function' && typeof value.catch === 'function';
+  return value && typeof value === 'function' &&  typeof value.then === 'function' && typeof value.catch === 'function';
 }
 
-export function isArray(value: any) {
+export function isArray(value: any): value is any[] {
   return toString.call(value) === "[object Array]"
 }
 
-export function isObject(value: any) {
+export function isObject(value: any): value is {} {
   return toString.call(value) === "[object Object]"
 }

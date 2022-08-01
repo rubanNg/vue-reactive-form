@@ -17,7 +17,7 @@ export const formControlDirective = {
         if (("value" in element) === false) return;
         element.bindingValue = binding.value;
         element.addEventListener('input', updateModel);
-        removeListener = (element.bindingValue as FormControl).detectChange((value) => {
+        removeListener = (element.bindingValue as FormControl)?.valueChange((value) => {
           (element.value !== value) && (element.value = value);
         });
       },
