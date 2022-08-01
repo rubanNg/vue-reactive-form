@@ -9,9 +9,6 @@ export class FormArray extends AbstractControl {
 
   private _controls: Array<AbstractControl> = [];
 
-  dirty: boolean = false;
-  parent: AbstractControl = null;
-
   get controls() {
     return this._controls;
   }
@@ -29,10 +26,6 @@ export class FormArray extends AbstractControl {
     this.configureControls(controls);
   }
 
-  setDirty(value: boolean) {
-    this.dirty = value
-  }
-
   setControls(controls: AbstractControl | Array<AbstractControl>) {
     this.configureControls(wrapToArray(controls));
   }
@@ -40,13 +33,6 @@ export class FormArray extends AbstractControl {
   setValue(value:(string | number)[]): void {
     if(!isArray(value) || value.length === 0) return;
     this.updateValue(value);
-  }
-
-  setForm(form: ReactiveForm) {
-    super.setForm(form);
-    for (const control of this._controls) {
-      control.setForm(form);
-    }
   }
 
   removeControl(index: number) {
@@ -69,11 +55,19 @@ export class FormArray extends AbstractControl {
     this._controls[index].value = value;  
   }
 
+  setForm(form: ReactiveForm) {
+    Reflect.set(this, "_form", form);
+    for (const control of this._controls) {
+      control.setForm(form);
+    }
+  }
+
 
   private updateValue(value: (string | number)[]) {
     for (let index = 0; index < value.length; index++) {
-      if (index > this._controls.length - 1) break;
-      this._controls[index].value = value[index];
+      if (this._controls?.[index]) {
+        this._controls[index].value = value[index];
+      } else break;
     }
     this.onChange()
   }
@@ -83,9 +77,7 @@ export class FormArray extends AbstractControl {
   }
 
   private configureControls(controls: Array<AbstractControl>) {
-    for (const control of controls) {
-      control.parent = this;
-    }
+    for (const control of controls) Reflect.set(control, '_parent', this);
     this._controls.push(...controls);
     defineProperties(this);
   }

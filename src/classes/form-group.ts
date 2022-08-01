@@ -10,9 +10,6 @@ export class FormGroup<ListControlNames extends Record<string, AbstractControl> 
 
   private _controls: Record<string, AbstractControl> = {};
 
-  dirty: boolean = false;
-  parent: AbstractControl = null;
-
   get controls() { return this._controls as ListControlNames; }
   get valid() {
     for (const controlName in this._controls.value) {
@@ -35,16 +32,12 @@ export class FormGroup<ListControlNames extends Record<string, AbstractControl> 
     this.configureControls(controls);
   }
 
-  setDirty(value: boolean) {
-    this.dirty = value
-  }
-
   setControls(controls: Record<string, AbstractControl>) {
     this.configureControls({ ...controls })
   }
 
   setForm(form: ReactiveForm) {
-    super.setForm(form);
+    Reflect.set(this, "_form", form);
     for (const control in this._controls) {
       this._controls[control].setForm(form);
     }
@@ -86,7 +79,7 @@ export class FormGroup<ListControlNames extends Record<string, AbstractControl> 
   private configureControls(controls: Record<string, AbstractControl>) {
     for (const controlName in controls) {
       this._controls[controlName] = controls[controlName];
-      this._controls[controlName].parent = this;
+      Reflect.set(this._controls[controlName], '_parent', this);
     }
     defineProperties(this);
   }

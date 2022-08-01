@@ -6,12 +6,14 @@ import { find, wrapToArray } from "../utils";
 export abstract class AbstractControl {
 
   private _errors: ValidationErrors = null;
+  private _parent: AbstractControl = null;
   private _form: ReactiveForm = null;
   private _validators: ValidationFn[] = [];
 
   get errors(): ValidationErrors  { return this._errors; };
   get validators(): ValidationFn[] { return this._validators; }
   get form() { return this._form; }
+  get parent() { return this._parent; }
 
   constructor(validators: ValidationFn[]) {
     this._validators = validators;
@@ -64,6 +66,10 @@ export abstract class AbstractControl {
     return path ? find<ValidationErrors>(this._errors, path) : this._errors[error] || null;
   }
 
+  clearErrors() {
+    this._errors = null;
+  }
+
   validate() {
     let errors: {} = null;
     for (const validator of this.validators) {
@@ -86,12 +92,9 @@ export abstract class AbstractControl {
     }
     return unique;
   }
-  
+
   abstract value: any;
-  abstract dirty: boolean;
   abstract valid: boolean;
-  abstract parent: AbstractControl | null;
   abstract setValue(value: any): void;
-  abstract setDirty(value: boolean): void;
   abstract reset(): void;
 }

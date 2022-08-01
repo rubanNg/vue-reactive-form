@@ -49,13 +49,14 @@ export function find<T>(parent: any, path: string): T {
 }
 
 export function toRecord<T = any>(value: any): Record<string, T> {
-  if (isObject(value)) return value as Record<string, any>;
+  if (isObject(value)) return value as Record<string, T>;
   if (isArray(value)) {
-    return value.reduce((result: any, arrayValue: any, index: number) => {
+    return value.reduce((result: Record<string, T>, arrayValue: T, index: number) => {
       result[index] = arrayValue;
       return result;
-    }, {} as Record<string, T>)
+    }, {})
   }
+  if (isPrimitive(value)) return { value }
   return {};
 }
 
@@ -79,15 +80,17 @@ export function isObject(value: any): value is {} {
   return toString.call(value) === "[object Object]"
 }
 
+export function isPrimitive(value: any) {
+  const types = ["boolean", "number", "string"];
+  return types.includes(typeof value);
+}
 
 export function interceptControlsGetters<T>(object: any): T {
   return new Proxy(object, {
     get(target, property) {
       if (property in target) {
-        [property, target, property in target]
         return Reflect.get(target, property);
       } else if (property in (target.controls || {})) {
-        [property, target.controls, property in target.controls]
         return Reflect.get(target.controls, property);
       } else return null;
     }

@@ -8,7 +8,6 @@ export class FormControl extends AbstractControl {
   private _value: any = null;
   private _listiners: ((event: string) => void)[] = [];
 
-  parent: AbstractControl = null;
   dirty: boolean = false;
 
 
@@ -25,18 +24,14 @@ export class FormControl extends AbstractControl {
     this.onChange();
   }
 
-  constructor(value: any = null, validators: ValidationFn | ValidationFn[] = []) {
+  constructor(value: any, validators: ValidationFn | ValidationFn[] = []) {
     super(wrapToArray(validators));
     this._value = value ?? null;
   }
 
-  /**
-   * @param listener emit on every value change
-   * @returns unsubscribe function
-   */
+
   valueChange(listener: (value: string) => void) {
     this._listiners.push(listener);
-
     return (() => {
       this._listiners = this._listiners.filter(l => l !== listener);
     }).bind(this);
@@ -55,7 +50,7 @@ export class FormControl extends AbstractControl {
   }
 
   setForm(form: ReactiveForm) {
-    super.setForm(form);
+    Reflect.set(this, "_form", form);
   }
 
 
