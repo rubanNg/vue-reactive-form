@@ -1,49 +1,37 @@
 import { ref } from "vue";
-import { ReactiveForm } from "..";
 import { ValidationErrors, ValidationFn } from "../types";
 import { wrapToArray, defineProperties, isObject } from "../utils";
 import { AbstractControl } from "./abstract-conrol";
 
 
 
-export class FormGroup<ListControlNames extends Record<string, AbstractControl> = any> extends AbstractControl {
+export class FormGroup extends AbstractControl {
 
-  private _controls: Record<string, AbstractControl> = {};
+  private _controls: { [ key: string ]: AbstractControl } = {};
 
-  get controls() { return this._controls as ListControlNames; }
+  get controls() { return this._controls; }
   get valid() {
-    for (const controlName in this._controls.value) {
-      if (!this._controls[controlName].valid) return false;
-    }
+    for (const name in this._controls.value)if (!this._controls[name].valid) return false;
     return this.validate();
   }
 
   get value() {
-    const keys = Object.keys(this._controls);
-    const result: Record<any, any> = {};
-    return keys.reduce((result, controlName) => {
-      result[controlName] = this._controls[controlName].value;
+    return Object.entries(this._controls).reduce((result: { [key: string]: any }, [name, control]) => {
+      result[name] = control.value;
       return result;
-    }, result)
+    }, {})
   }
 
-  constructor(controls: ListControlNames, validators: ValidationFn | ValidationFn[] = []) {
+  constructor(controls: { [ key: string ]: AbstractControl }, validators: ValidationFn | ValidationFn[] = []) {
     super(wrapToArray(validators));
     this.configureControls(controls);
   }
 
-  setControls(controls: Record<string, AbstractControl>) {
+  addControls(controls: { [key: string]: AbstractControl }) {
     this.configureControls({ ...controls })
   }
-
-  setForm(form: ReactiveForm) {
-    Reflect.set(this, "_form", form);
-    for (const control in this._controls) {
-      this._controls[control].setForm(form);
-    }
-  }
   
-  setValue(value: Record<string, any> = null): void {
+  setValue(value: { [key: string]: any }): void {
     if (!isObject(value) || Object.keys(value).length === 0) {
       console.error('"setValue" function argument must be a plain object');
       return;
@@ -64,9 +52,9 @@ export class FormGroup<ListControlNames extends Record<string, AbstractControl> 
   }
 
   private updateValue(value: Record<string, any>) {
-    for (const controlName in value) {
-      if (this._controls?.[controlName]) {
-        this._controls[controlName].value = value[controlName];
+    for (const name in value) {
+      if (this._controls?.[name]) {
+        this._controls[name].value = value[name];
       }
     }
     this.onChange()
@@ -77,10 +65,9 @@ export class FormGroup<ListControlNames extends Record<string, AbstractControl> 
   }
 
   private configureControls(controls: Record<string, AbstractControl>) {
-    for (const controlName in controls) {
-      this._controls[controlName] = controls[controlName];
-      Reflect.set(this._controls[controlName], '_parent', this);
+    for (const name in controls) {
+      this._controls[name] = controls[name];
+      this._controls[name].setParent(this);
     }
-    defineProperties(this);
   }
 }

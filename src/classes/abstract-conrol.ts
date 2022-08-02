@@ -1,4 +1,4 @@
-import { ReactiveForm } from "..";
+import { FormArray, FormGroup } from "..";
 import { ValidationErrors, ValidationFn } from "../types";
 import { find, wrapToArray } from "../utils";
 
@@ -6,8 +6,8 @@ import { find, wrapToArray } from "../utils";
 export abstract class AbstractControl {
 
   private _errors: ValidationErrors = null;
-  private _parent: AbstractControl = null;
-  private _form: ReactiveForm = null;
+  private _parent: FormGroup | FormArray | null = null;
+  private _form: AbstractControl = null;
   private _validators: ValidationFn[] = [];
 
   get errors(): ValidationErrors  { return this._errors; };
@@ -17,10 +17,6 @@ export abstract class AbstractControl {
 
   constructor(validators: ValidationFn[]) {
     this._validators = validators;
-  }
-
-  setForm(form: ReactiveForm) {
-    this._form = form;
   }
 
   get(path: string) {
@@ -50,9 +46,19 @@ export abstract class AbstractControl {
     emitValidation && this.validate();
   }
 
-  hasError(error: string, path?: string) {
-    if (path) return error in (this.get(path) ? this.get(path)._errors : {});
-    return error in (this._errors || {});
+  hasError(errorName: string) {
+    return errorName in this._errors;
+  }
+
+  hasErrors(errorsNames: string[]) {
+    return wrapToArray(errorsNames).every(errorName => errorName in this._errors)
+  }
+
+  hasAnyError(errorsNames: string[]) {
+    for (const errorName in errorsNames) {
+      if (this._errors[errorName]) return true;
+    }
+    return false;
   }
 
   setErrors(errors: ValidationErrors) {
@@ -62,8 +68,12 @@ export abstract class AbstractControl {
     }
   }
 
-  getError(error: string, path?: string) {
-    return path ? find<ValidationErrors>(this._errors, path) : this._errors[error] || null;
+  getErrors(errorsNames: string | string[]) {
+    const errors: ValidationErrors = {}
+    for (const errorName in wrapToArray(errorsNames)) {
+      if (this._errors[errorName]) errors[errorName] = this._errors[errorName];
+    }
+    return errors;
   }
 
   clearErrors() {
@@ -80,6 +90,10 @@ export abstract class AbstractControl {
     }
     this._errors = errors;
     return this._errors === null;
+  }
+
+  setParent(parent: FormGroup | FormArray | null): void {
+    this._parent = parent;
   }
 
   private distinctValidators (validators: ValidationFn[]) {
