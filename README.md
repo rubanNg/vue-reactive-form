@@ -23,7 +23,9 @@ Reactive vue forms
 
 
       <ul class="list-group">
-        <li class="list-group-item" v-for="(control, index) in group.get('values').controls" :key="index">{{ control.value }}</li>
+        <li class="list-group-item" v-for="(control, index) in group.get('values').controls" :key="index">
+          {{ control.value }}
+        </li>
       </ul>
 
 
@@ -82,6 +84,8 @@ Reactive vue forms
       new FormControl(3),
       new FormControl(4),
     ]);
+
+    const singleControl =  new FormControl("value control", [validatorFunction]),
 
 
 
