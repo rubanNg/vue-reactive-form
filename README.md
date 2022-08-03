@@ -9,9 +9,8 @@ Reactive vue forms
 
 <hr/>  
 
-```javascript
-
-  <template>
+```html
+   <template>
     <div class="container justify-content-center">
       <h1 @click="add()">Hello</h1>
 
@@ -41,9 +40,10 @@ Reactive vue forms
       <div><pre>{{ simpleArrayForm.value }}</pre></div>
     </div>
   </template>
+```
 
-  <script lang="ts" setup>
-    import { FormControl, FormGroup, FormArray, Validators } from 'reactive-vue-form'
+```javascript
+  import { FormControl, FormGroup, FormArray, Validators } from 'reactive-vue-form'
 
 
     const group = new FormGroup({
@@ -92,10 +92,9 @@ Reactive vue forms
       group.controls.selected.setValue('');
     }
 
-
-  </script>
-
+```
+```style
   <style>
     @import 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css'
-</style>
+  </style>
 ```
