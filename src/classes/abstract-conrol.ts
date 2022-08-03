@@ -7,12 +7,10 @@ export abstract class AbstractControl {
 
   private _errors: ValidationErrors = null;
   private _parent: FormGroup | FormArray | null = null;
-  private _form: AbstractControl = null;
   private _validators: ValidationFn[] = [];
 
   get errors(): ValidationErrors  { return this._errors; };
   get validators(): ValidationFn[] { return this._validators; }
-  get form() { return this._form; }
   get parent() { return this._parent; }
 
   constructor(validators: ValidationFn[]) {
@@ -91,8 +89,12 @@ export abstract class AbstractControl {
     return this._errors === null;
   }
 
-  setParent(parent: FormGroup | FormArray | null): void {
+  setParent(parent: FormGroup | FormArray | null) {
     this._parent = parent;
+    console.log({
+      PARENT: parent,
+      _parent: this._parent
+    })
   }
 
   private distinctValidators (validators: ValidationFn[]) {

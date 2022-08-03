@@ -11,9 +11,7 @@ export class FormArray extends AbstractControl {
   get controls(): AbstractControl[] { return this._controls; }
   get valid() { return this._controls.some(s => !s.valid) ? false : this.validate(); }
   get value(): any[] { 
-    return this._controls.map(control => {
-      return isProxy(control.value) ? toRaw(control.value) : control.value;
-    }); 
+    return this._controls.map(control => control.value); 
   }
 
   constructor(controls: Array<AbstractControl>, validators: ValidationFn | ValidationFn[] = []) {

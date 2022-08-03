@@ -9,93 +9,92 @@ Reactive vue forms
 
 <hr/>  
 
+
 ```html
-   <template>
+  <template>
     <div class="container justify-content-center">
-      <h1 @click="add()">Hello</h1>
+      <h1 @click="add()">Signle control</h1>
 
       <br>
-      <div class="d-flex">
-        <input type="text" class="form-control" v-model="group.get('selected').value">
-        <button @click="add()" class="btn btn-success">Add</button>
+      <div class="d-flex flex-column">
+        <div class="d-flex">
+          <input type="text" :class="{ 'is-invalid': single.hasError('required') }" class="form-control" v-model="single.value">
+          <button @click="logControl(single)" :disabled="!single.value" class="btn btn-success">log control to console</button>
+        </div>
+        <span style="color: red" v-if="single.hasError('required')">Обязательное поле!!!</span>
+      </div>
+      <hr>
+
+      <h1 @click="add()">Array control</h1>
+
+      <br>
+      <div class="d-flex flex-column">
+        <div class="d-flex">
+          <button @click="manageControl('add')" class="btn btn-success">add value</button>
+          <button @click="logControl(array)" class="btn btn-success">log control to console</button>
+        </div>
+        <ul class="list-group">
+          <li class="list-group-item" v-for="(control, index) in array.controls" :key="index">
+          <div class="d-flex justify-content-between">
+              {{ control.value }}
+              <button @click="manageControl('remove', index)" class="btn btn-danger">remove</button>
+          </div>
+          </li>
+        </ul>
       </div>
       <hr>
 
 
-      <ul class="list-group">
-        <li class="list-group-item" v-for="(control, index) in group.get('values').controls" :key="index">
-          {{ control.value }}
-        </li>
-      </ul>
+      <h1 @click="add()">Group control</h1>
 
-
-      <h1>FormGroup</h1>
-      <div><pre>{{ group.value }}</pre></div>
-
-      <h1>FormArray</h1>
-      <div><pre>{{ simpleArrayForm.value }}</pre></div>
-
-      <h1>Nested value</h1>
-      <h3>group.get("test.nested.nested_nested.0.arrayGroup.array1.0")</h3>
-      //OR
-      <h3>group.get([test, nested, nested_nested , 0, arrayGroup, array1, 0])</h3>
-      <div><pre>{{ simpleArrayForm.value }}</pre></div>
+      <br>
+      <div class="d-flex flex-column">
+        <div class="d-flex">
+          <input type="text" :class="{ 'is-invalid': group.get('name').errors }" class="form-control" v-model="group.get('name').value">
+        </div>
+        <span style="color: red" v-if="group.get('name').errors">
+          raw errors {{ group.get('name').errors }}
+        </span>
+        <div class="d-flex">
+          <input type="number" :class="{ 'is-invalid': group.get('age').errors }" class="form-control" v-model="group.get('age').value">
+        </div>
+        <span style="color: red" v-if="group.get('age').errors">
+          raw errors {{ group.get('age').errors }}
+        </span>
+      </div>
+      <hr>
+      
     </div>
   </template>
 ```
-
 ```javascript
-  import { FormControl, FormGroup, FormArray, Validators } from 'reactive-vue-form'
+  <script lang="ts" setup>
+    import { FormControl, FormGroup, FormArray, Validators, AbstractControl } from 'reactive-vue-form'
 
 
-    const group = new FormGroup({
-      selected: new FormControl(''),
-      values: new FormArray([]),
-      test: new FormGroup({
-        nested: new FormGroup({
-          nested_nested: new FormArray([
-            new FormGroup({
-              arrayGroup: new FormGroup({
-                array1: new FormArray([
-                  new FormControl('deep')
-                ])
-              })
-            }),
-            new FormControl("array item")
-          ]),
-          single: new FormControl('single'),
-          array: new FormArray([
-            new FormGroup({
-              arrayGroup: new FormGroup({
-                array1: new FormArray([
-                  new FormControl('deep')
-                ])
-              })
-            }),
-            new FormControl("array item")
-          ])
-        })
-      })
-    });
+    const single = new FormControl('value', [Validators.required]);
 
-    const simpleArrayForm = new FormArray([
-      new FormControl(1),
-      new FormControl(2),
-      new FormControl(3),
-      new FormControl(4),
-    ]);
-
-    const singleControl =  new FormControl("value control", [validatorFunction]),
-
-
-
-    function add() {
-      (group.controls.values as FormArray).addControls([
-        new FormControl(group.controls.selected.value)
-      ]);
-      group.controls.selected.setValue('');
+    function logControl(control: AbstractControl) {
+      console.log({ control })
     }
 
+    const array = new FormArray([]);
+
+
+    function manageControl(action: string, index: number) {
+      if (action === "add") array.addControls([new FormControl(Date.now())])
+      if (action === "remove") array.removeAt(index)
+    }
+
+    const group = new FormGroup({
+      name: new FormControl('', [Validators.required]),
+      age: new FormControl('', [
+        Validators.required, 
+        (control) => { return control.value < 18 ? { young: "Не меньше 18!!!" } : null; }
+      ]),
+    });
+
+  </script>
 ```
 ```style
   <style>

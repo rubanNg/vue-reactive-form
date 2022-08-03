@@ -18,7 +18,7 @@ export class FormGroup extends AbstractControl {
 
   get value() {
     return Object.entries(this._controls).reduce((result: { [key: string]: any }, [name, control]) => {
-      result[name] = isProxy(control.value) ? toRaw(control.value) : control.value;
+      result[name] = control.value;
       return result;
     }, {})
   }
