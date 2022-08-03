@@ -18,10 +18,6 @@ export abstract class AbstractControl {
   constructor(validators: ValidationFn[]) {
     this._validators = validators;
   }
-
-  get(path: string) {
-    return find<AbstractControl>(this, path)
-  }
   
   setValidators(validators: ValidationFn | ValidationFn[], emitValidation: boolean = false) {
     this._validators = wrapToArray(validators);
@@ -47,14 +43,17 @@ export abstract class AbstractControl {
   }
 
   hasError(errorName: string) {
+    if (!this._errors) return false;
     return errorName in this._errors;
   }
 
   hasErrors(errorsNames: string[]) {
+    if (!this._errors) return false;
     return wrapToArray(errorsNames).every(errorName => errorName in this._errors)
   }
 
   hasAnyError(errorsNames: string[]) {
+    if (!this._errors) return false;
     for (const errorName in errorsNames) {
       if (this._errors[errorName]) return true;
     }
@@ -107,6 +106,7 @@ export abstract class AbstractControl {
     return unique;
   }
 
+  abstract get(path: string | string[]): AbstractControl | null;
   abstract value: any;
   abstract valid: boolean;
   abstract setValue(value: any): void;

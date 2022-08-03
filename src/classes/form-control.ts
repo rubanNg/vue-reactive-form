@@ -1,22 +1,21 @@
-import { ReactiveForm } from "..";
-import { ValidationErrors, ValidationFn } from "../types";
+import { isProxy, toRaw } from "vue";
+import { ValidationFn } from "../types";
 import { wrapToArray } from "../utils";
 import { AbstractControl } from "./abstract-conrol";
 
-export class FormControl extends AbstractControl {
+export class FormControl<T = any> extends AbstractControl {
 
-  private _value: any = null;
-  private _listiners: ((event: string) => void)[] = [];
+  private _value: T = null;
+  private _listiners: ((event: T) => void)[] = [];
 
   dirty: boolean = false;
-
 
   get valid() {
     return this.validate();
   }
 
-  get value() {
-    return this._value;
+  get value(): T {
+    return isProxy(this._value) ? toRaw(this._value) : this._value;
   }
 
   set value(value) {
@@ -24,13 +23,17 @@ export class FormControl extends AbstractControl {
     this.onChange();
   }
 
-  constructor(value: any, validators: ValidationFn | ValidationFn[] = []) {
+  constructor(value: T = null, validators: ValidationFn | ValidationFn[] = []) {
     super(wrapToArray(validators));
     this._value = value ?? null;
   }
 
+  get(path: string | string[]) {
+    return null as AbstractControl;
+  }
 
-  valueChange(listener: (value: string) => void) {
+
+  valueChanges(listener: (value: T) => void) {
     this._listiners.push(listener);
     return (() => {
       this._listiners = this._listiners.filter(l => l !== listener);
@@ -49,16 +52,10 @@ export class FormControl extends AbstractControl {
     this.dirty = value;
   }
 
-  setForm(form: ReactiveForm) {
-    Reflect.set(this, "_form", form);
-  }
-
-
   private onChange() {
     this._listiners.forEach(listener => listener(this._value))
     this.validate();
     !this.dirty && (this.dirty = true);
   }
-
 }
 

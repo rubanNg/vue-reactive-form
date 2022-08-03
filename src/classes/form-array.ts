@@ -1,16 +1,20 @@
-import { FormGroup } from "..";
-import { ValidationErrors, ValidationFn } from "../types";
-import { wrapToArray, defineProperties, isArray } from "../utils";
+import { Ref, reactive, isProxy, toRaw } from "vue";
+import { ValidationFn } from "../types";
+import { wrapToArray, isArray, find } from "../utils";
 import { AbstractControl } from "./abstract-conrol";
 
 
 export class FormArray extends AbstractControl {
 
-  private _controls: Array<AbstractControl> = [];
+  private _controls: AbstractControl[] = reactive([]);
 
-  get controls() { return this._controls; }
+  get controls(): AbstractControl[] { return this._controls; }
   get valid() { return this._controls.some(s => !s.valid) ? false : this.validate(); }
-  get value() { return this._controls.map(control => control.value); }
+  get value(): any[] { 
+    return this._controls.map(control => {
+      return isProxy(control.value) ? toRaw(control.value) : control.value;
+    }); 
+  }
 
   constructor(controls: Array<AbstractControl>, validators: ValidationFn | ValidationFn[] = []) {
     super(wrapToArray(validators));
@@ -21,8 +25,16 @@ export class FormArray extends AbstractControl {
     this.configureControls(controls);
   }
 
-  at(index: number) {
+  setControl(index: number, control: AbstractControl) {
+    if(this._controls[index]) this._controls[index] = control;
+  }
+
+  at(index: number): AbstractControl {
     return this._controls[index];
+  }
+
+  get(path: string | string[]): AbstractControl {
+    return find(this, path);
   }
 
   contains(index: number) {
@@ -39,7 +51,7 @@ export class FormArray extends AbstractControl {
   }
 
   removeAt(index: number) {
-    this.controls.splice(index, 1);
+    this._controls.splice(index, 1);
   }
 
   reset() {
@@ -53,7 +65,7 @@ export class FormArray extends AbstractControl {
   private updateValue(value: any[]) {
     for (let index = 0; index < value.length; index++) {
       if (this._controls?.[index]) {
-        this._controls[index].value = value[index];
+        this._controls.at(index).value = value[index];
       } else break;
     }
     this.onChange()

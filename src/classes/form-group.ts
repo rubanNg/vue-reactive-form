@@ -1,23 +1,24 @@
-import { ref } from "vue";
+import { isProxy, reactive, Ref, ref, toRaw } from "vue";
 import { ValidationErrors, ValidationFn } from "../types";
-import { wrapToArray, defineProperties, isObject } from "../utils";
+import { wrapToArray, defineProperties, isObject, find } from "../utils";
 import { AbstractControl } from "./abstract-conrol";
 
 
 
 export class FormGroup extends AbstractControl {
 
-  private _controls: { [ key: string ]: AbstractControl } = {};
+
+  private _controls: { [key: string]: AbstractControl } = reactive({});
 
   get controls() { return this._controls; }
   get valid() {
-    for (const name in this._controls.value)if (!this._controls[name].valid) return false;
+    for (const name in this._controls) if (!this._controls[name].valid) return false;
     return this.validate();
   }
 
   get value() {
     return Object.entries(this._controls).reduce((result: { [key: string]: any }, [name, control]) => {
-      result[name] = control.value;
+      result[name] = isProxy(control.value) ? toRaw(control.value) : control.value;
       return result;
     }, {})
   }
@@ -29,6 +30,14 @@ export class FormGroup extends AbstractControl {
 
   addControls(controls: { [key: string]: AbstractControl }) {
     this.configureControls({ ...controls })
+  }
+
+  get(path: string | string[]): AbstractControl {
+    return find(this, path);
+  }
+
+  setControl(name: string, control: AbstractControl) {
+    if(this._controls[name]) this._controls[name] = control;
   }
   
   setValue(value: { [key: string]: any }): void {

@@ -1,4 +1,4 @@
-import { FormArray, FormGroup, ReactiveForm } from "..";
+import { FormArray, FormControl, FormGroup } from "..";
 import { AbstractControl } from "../classes/abstract-conrol";
 
 
@@ -35,17 +35,25 @@ export function undefineProperties(object: any, properties: string | string[]) {
   }
 }
 
-export function find<T>(parent: any, path: string): T {
-  let value = parent;
-  for (const segment of path.split(".")) {
-    value = (value || parent);
-    if (value[segment]) {
-      value = value[segment];
-    } else {
-      return null;
-    };
+export function find(parent: FormGroup | FormArray, path: string | string[]) {
+
+  if (!parent) return null;
+  
+  function findControl(controls: any, name: any) {
+    return controls?.[name];
   }
-  return value as T;
+
+  let value = parent;
+  const _path = typeof path === 'string' ? path.split("."): path;
+
+  for (const name of _path) {
+    const control = findControl(value?.controls, name);
+    if (control) value = control;
+    else return null;
+  }
+
+  return value as AbstractControl;
+  
 }
 
 export function toRecord<T = any>(value: any): Record<string, T> {
