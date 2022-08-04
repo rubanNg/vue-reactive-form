@@ -1,5 +1,5 @@
 import { Ref, reactive, isProxy, toRaw } from "vue";
-import { ValidationFn } from "../types";
+import { AsyncValidatorFn, ValidationFn } from "../types";
 import { wrapToArray, isArray, find } from "../utils";
 import { AbstractControl } from "./abstract-conrol";
 
@@ -9,13 +9,12 @@ export class FormArray extends AbstractControl {
   private _controls: AbstractControl[] = reactive([]);
 
   get controls(): AbstractControl[] { return this._controls; }
-  get valid() { return this._controls.some(s => !s.valid) ? false : this.validate(); }
   get value(): any[] { 
     return this._controls.map(control => control.value); 
   }
 
-  constructor(controls: Array<AbstractControl>, validators: ValidationFn | ValidationFn[] = []) {
-    super(wrapToArray(validators));
+  constructor(controls: Array<AbstractControl>, validators: ValidationFn | ValidationFn[] = [], asyncValidators: AsyncValidatorFn | AsyncValidatorFn[] = []) {
+    super(wrapToArray(validators), wrapToArray(asyncValidators));
     this.configureControls(controls);
   }
 
@@ -66,16 +65,16 @@ export class FormArray extends AbstractControl {
         this._controls.at(index).value = value[index];
       } else break;
     }
-    this.onChange()
+    this.onValueChange()
   }
 
-  private onChange() {
-    this.validate();
+  private onValueChange() {
+    this._updateValidity();
   }
 
   private configureControls(controls: Array<AbstractControl>) {
     for (const control of controls) {
-      control.setParent(this);
+      control._setParent(this);
       this._controls.push(control);
     }
   }

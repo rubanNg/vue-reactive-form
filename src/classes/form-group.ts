@@ -1,5 +1,5 @@
 import { isProxy, reactive, Ref, ref, toRaw } from "vue";
-import { ValidationErrors, ValidationFn } from "../types";
+import { AsyncValidatorFn, ControlStatus, ValidationErrors, ValidationFn } from "../types";
 import { wrapToArray, defineProperties, isObject, find } from "../utils";
 import { AbstractControl } from "./abstract-conrol";
 
@@ -11,10 +11,6 @@ export class FormGroup extends AbstractControl {
   private _controls: { [key: string]: AbstractControl } = reactive({});
 
   get controls() { return this._controls; }
-  get valid() {
-    for (const name in this._controls) if (!this._controls[name].valid) return false;
-    return this.validate();
-  }
 
   get value() {
     return Object.entries(this._controls).reduce((result: { [key: string]: any }, [name, control]) => {
@@ -23,8 +19,8 @@ export class FormGroup extends AbstractControl {
     }, {})
   }
 
-  constructor(controls: { [ key: string ]: AbstractControl }, validators: ValidationFn | ValidationFn[] = []) {
-    super(wrapToArray(validators));
+  constructor(controls: { [ key: string ]: AbstractControl }, validators: ValidationFn | ValidationFn[] = [], asyncValidators: AsyncValidatorFn | AsyncValidatorFn[] = []) {
+    super(wrapToArray(validators), wrapToArray(asyncValidators));
     this.configureControls(controls);
   }
 
@@ -66,17 +62,17 @@ export class FormGroup extends AbstractControl {
         this._controls[name].value = value[name];
       }
     }
-    this.onChange()
+    this.onValueChange()
   }
 
-  private onChange() {
-    this.validate();
+  private onValueChange() {
+    this._updateValidity();
   }
 
   private configureControls(controls: Record<string, AbstractControl>) {
     for (const name in controls) {
       this._controls[name] = controls[name];
-      this._controls[name].setParent(this);
+      this._controls[name]._setParent(this);
     }
   }
 }

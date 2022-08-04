@@ -1,5 +1,5 @@
 import { isProxy, Ref, reactive, toRaw } from "vue";
-import { ValidationFn } from "../types";
+import { AsyncValidatorFn, ValidationFn } from "../types";
 import { wrapToArray } from "../utils";
 import { AbstractControl } from "./abstract-conrol";
 
@@ -10,21 +10,17 @@ export class FormControl<T = any> extends AbstractControl {
 
   dirty: boolean = false;
 
-  get valid() {
-    return this.validate();
-  }
-
   get value(): T {
     return this._value.value;
   }
 
   set value(value) {
     this._value.value = value;
-    this.onChange();
+    this.onValueChange();
   }
 
-  constructor(value: T = null, validators: ValidationFn | ValidationFn[] = []) {
-    super(wrapToArray(validators));
+  constructor(value: T = null, validators: ValidationFn | ValidationFn[] = [], asyncValidators: AsyncValidatorFn | AsyncValidatorFn[] = []) {
+    super(wrapToArray(validators), wrapToArray(asyncValidators));
     this._value.value = value ?? null;
   }
 
@@ -53,9 +49,9 @@ export class FormControl<T = any> extends AbstractControl {
     this.dirty = value;
   }
 
-  private onChange() {
+  private onValueChange() {
     this._listiners.forEach(listener => listener(this._value.value))
-    this.validate();
+    this._updateValidity();
     !this.dirty && (this.dirty = true);
   }
 }

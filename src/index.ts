@@ -9,7 +9,7 @@ export {
   FormGroup,
   FormControl,
   FormArray,
-  formControlDirective,
   AbstractControl,
   Validators,
+  formControlDirective,
 }
