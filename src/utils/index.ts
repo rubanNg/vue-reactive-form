@@ -76,7 +76,7 @@ export function toArray<T = any>(value: any): T[] {
   return [value] as T[];
 }
 
-export function isPromise(value: any) {
+export function isPromise(value: any): value is Promise<any> {
   return value && typeof value === 'function' &&  typeof value.then === 'function' && typeof value.catch === 'function';
 }
 
@@ -103,4 +103,8 @@ export function interceptControlsGetters<T>(object: any): T {
       } else return null;
     }
   })
+}
+
+export function isAsyncFunction(fn: Function) {
+  return typeof fn === 'function' && fn.constructor.name === "AsyncFunction";
 }

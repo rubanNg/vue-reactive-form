@@ -1,17 +1,28 @@
 import { FormArray, FormGroup } from "..";
 import { ValidationErrors, ValidationFn } from "../types";
-import { find, wrapToArray } from "../utils";
+import { find, isAsyncFunction, isPromise, wrapToArray } from "../utils";
 
+
+enum ControlStatus {
+  VALID = "VALID",
+  INVALID = "INVALID",
+  PENDING = "PENDING"
+}
 
 export abstract class AbstractControl {
 
   private _errors: ValidationErrors = null;
   private _parent: FormGroup | FormArray | null = null;
   private _validators: ValidationFn[] = [];
+  private _status: ControlStatus = ControlStatus.VALID;
 
   get errors(): ValidationErrors  { return this._errors; };
   get validators(): ValidationFn[] { return this._validators; }
   get parent() { return this._parent; }
+  get status() {
+    if (this._status === ControlStatus.PENDING) return ControlStatus.PENDING;
+    return this.valid ? ControlStatus.VALID : ControlStatus.INVALID;
+  }
 
   constructor(validators: ValidationFn[]) {
     this._validators = validators;
@@ -66,6 +77,7 @@ export abstract class AbstractControl {
   }
 
   getErrors(errorsNames: string | string[]) {
+    if (!this._errors) return false;
     const errors: ValidationErrors = {}
     for (const errorName in wrapToArray(errorsNames)) {
       if (this._errors[errorName]) errors[errorName] = this._errors[errorName];
@@ -80,6 +92,10 @@ export abstract class AbstractControl {
   validate() {
     let errors: {} = null;
     for (const validator of this.validators) {
+      if (isAsyncFunction(validator)) {
+        this.executeAsyncValidator(validator);
+        continue;
+      }
       const error = validator(this) || null;
       if (error !== null) {
         errors = { ...errors, ...error }
@@ -91,10 +107,6 @@ export abstract class AbstractControl {
 
   setParent(parent: FormGroup | FormArray | null) {
     this._parent = parent;
-    console.log({
-      PARENT: parent,
-      _parent: this._parent
-    })
   }
 
   private distinctValidators (validators: ValidationFn[]) {
@@ -106,6 +118,21 @@ export abstract class AbstractControl {
       unique.push(validator);
     }
     return unique;
+  }
+
+  private executeAsyncValidator(validator: Function) {
+    this._status = ControlStatus.PENDING;
+    Promise.resolve(validator(this)).then(error => {
+      if (error !== null) {
+        this._errors = {
+          ...this._errors,
+          ...error
+        }
+      }
+    }).finally(() => {
+      if (this._errors) this._status = ControlStatus.INVALID;
+      else this._status = ControlStatus.VALID;
+    })
   }
 
   abstract get(path: string | string[]): AbstractControl | null;
