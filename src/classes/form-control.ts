@@ -51,7 +51,7 @@ export class FormControl<T = any> extends AbstractControl {
 
   private onValueChange() {
     this._listiners.forEach(listener => listener(this._value.value))
-    this._updateValidity();
+    this.updateValidity();
     !this.dirty && (this.dirty = true);
   }
 }

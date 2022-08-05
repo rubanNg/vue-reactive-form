@@ -1,4 +1,4 @@
-import { isProxy, reactive, Ref, ref, toRaw } from "vue";
+import { isProxy, reactive, Ref, ref, toRaw, watch } from "vue";
 import { AsyncValidatorFn, ControlStatus, ValidationErrors, ValidationFn } from "../types";
 import { wrapToArray, defineProperties, isObject, find } from "../utils";
 import { AbstractControl } from "./abstract-conrol";
@@ -24,28 +24,52 @@ export class FormGroup extends AbstractControl {
     this.configureControls(controls);
   }
 
-  addControls(controls: { [key: string]: AbstractControl }) {
-    this.configureControls({ ...controls })
+  /**
+   * @param controls controls list
+   * @param onlySelf When true, each change only affects this control, and not its parent. Default is false. 
+   */
+  addControls(controls: { [key: string]: AbstractControl }, onlySelf?: boolean) {
+    this.configureControls({ ...controls });
+    this.updateValidity(onlySelf);
   }
 
   get(path: string | string[]): AbstractControl {
     return find(this, path);
   }
 
-  setControl(name: string, control: AbstractControl) {
+  /**
+   * @param name control name
+   * @param onlySelf When true, each change only affects this control, and not its parent. Default is false. 
+   */
+  setControl(name: string, control: AbstractControl, onlySelf?: boolean) {
     if(this._controls[name]) this._controls[name] = control;
+    this.updateValidity(onlySelf);
   }
   
-  setValue(value: { [key: string]: any }): void {
+   /**
+   * @param value controls value
+   * @param onlySelf When true, each change only affects this control, and not its parent. Default is false. 
+   */
+  setValue(value: { [key: string]: any }, onlySelf?: boolean) {
     if (!isObject(value) || Object.keys(value).length === 0) {
       console.error('"setValue" function argument must be a plain object');
-      return;
+    } else {
+      for (const name in value) {
+        if (this._controls?.[name]) {
+          this._controls[name].setValue((value as { [key: string]: any })[name], true);
+        }
+      }
+      this.updateValidity(onlySelf)
     }
-    this.updateValue(value);
   }
 
-  removeControl(name: string) {
-    delete this._controls[name]
+  /**
+   * @param value control name
+   * @param onlySelf When true, each change only affects this control, and not its parent. Default is false. 
+   */
+  removeControl(name: string, onlySelf?: boolean) {
+    delete this._controls[name];
+    this.updateValidity(onlySelf);
   }
 
   contains(name: string) {
@@ -54,19 +78,7 @@ export class FormGroup extends AbstractControl {
   
   reset() {
     for (const control in this._controls) this._controls[control].reset();
-  }
-
-  private updateValue(value: Record<string, any>) {
-    for (const name in value) {
-      if (this._controls?.[name]) {
-        this._controls[name].value = value[name];
-      }
-    }
-    this.onValueChange()
-  }
-
-  private onValueChange() {
-    this._updateValidity();
+    this.clearErrors();
   }
 
   private configureControls(controls: Record<string, AbstractControl>) {

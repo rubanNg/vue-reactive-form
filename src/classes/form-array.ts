@@ -1,4 +1,4 @@
-import { Ref, reactive, isProxy, toRaw } from "vue";
+import { Ref, reactive, isProxy, toRaw, watch } from "vue";
 import { AsyncValidatorFn, ValidationFn } from "../types";
 import { wrapToArray, isArray, find } from "../utils";
 import { AbstractControl } from "./abstract-conrol";
@@ -18,12 +18,23 @@ export class FormArray extends AbstractControl {
     this.configureControls(controls);
   }
 
-  addControls(controls: Array<AbstractControl>) {
+  /**
+   * @param controls AbstractControl list
+   * @param onlySelf When true, each change only affects this control, and not its parent. Default is false. 
+   */
+  addControls(controls: Array<AbstractControl>, onlySelf?: boolean) {
     this.configureControls(controls);
+    this.updateValidity(onlySelf);
   }
 
-  setControl(index: number, control: AbstractControl) {
+  /**
+   * @param index control index
+   * @param control control AbstractControl
+   * @param onlySelf When true, each change only affects this control, and not its parent. Default is false. 
+   */
+  setControl(index: number, control: AbstractControl, onlySelf?: boolean) {
     if(this._controls[index]) this._controls[index] = control;
+    this.updateValidity(onlySelf);
   }
 
   at(index: number): AbstractControl {
@@ -38,38 +49,41 @@ export class FormArray extends AbstractControl {
     return Boolean(this._controls[index])
   }
 
-  setValue(value: any[]): void {
+  /**
+   * @param value control value
+   * @param onlySelf When true, each change only affects this control, and not its parent. Default is false. 
+   */
+  setValue(value: any[], onlySelf: boolean = false): void {
     if(!isArray(value) || value.length === 0) return;
-    this.updateValue(value);
+    for (let index = 0; index < value.length; index++) {
+      if (this._controls?.[index]) {
+        this._controls.at(index).setValue(value[index], true);
+      } else break;
+    }
+    this.updateValidity(onlySelf);
   }
 
-  removeControl(index: number) {
+  /**
+   * @param index control index
+   * @param onlySelf When true, each change only affects this control, and not its parent. Default is false. 
+   */
+  removeAt(index: number, onlySelf?: boolean) {
     this._controls.splice(index, 1);
-  }
-
-  removeAt(index: number) {
-    this._controls.splice(index, 1);
+    this.updateValidity(onlySelf);
   }
 
   reset() {
     for (const control of this._controls) control.reset();
+    this.clearErrors();
   }
-
-  updateAt({ index, value }: { index: number, value: any }) {
-    this._controls[index].value = value;  
-  }
-
-  private updateValue(value: any[]) {
-    for (let index = 0; index < value.length; index++) {
-      if (this._controls?.[index]) {
-        this._controls.at(index).value = value[index];
-      } else break;
-    }
-    this.onValueChange()
-  }
-
-  private onValueChange() {
-    this._updateValidity();
+  /**
+   * @param index control index
+   * @param value control value
+   * @param onlySelf When true, each change only affects this control, and not its parent. Default is false. 
+   */
+  updateAt({ index, value }: { index: number, value: any }, onlySelf: boolean = false) {
+    this._controls[index].setValue(value, true);
+    this.updateValidity(onlySelf); 
   }
 
   private configureControls(controls: Array<AbstractControl>) {

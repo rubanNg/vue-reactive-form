@@ -31,30 +31,30 @@ export abstract class AbstractControl {
   
   setValidators(validators: ValidationFn | ValidationFn[], updateAndValidity: boolean = false) {
     this._validators = wrapToArray(validators);
-    updateAndValidity && this._updateValidity();
+    updateAndValidity && this.updateValidity();
   }
 
   addValidators(validators: ValidationFn | ValidationFn[], updateAndValidity: boolean = false) {
     const distinct = this.distinctValidators(wrapToArray(validators));
     this._validators.push(...distinct);
-    updateAndValidity && this._updateValidity();
+    updateAndValidity && this.updateValidity();
   }
 
   removeValidators(validators: ValidationFn | ValidationFn[], updateAndValidity: boolean = false) {
     this._validators = this._validators.filter(validator => {
       return wrapToArray(validators).some(s => s === validator || s.name === validator.name) ? false : true;
     });
-    updateAndValidity && this._updateValidity();
+    updateAndValidity && this.updateValidity();
   }
   
   clearValidators(updateAndValidity: boolean = false) {
     this._validators = [];
-    updateAndValidity && this._updateValidity();
+    updateAndValidity && this.updateValidity();
   }
 
   clearAsyncValidators(updateAndValidity: boolean = false) {
     this._asyncValidators = [];
-    updateAndValidity && this._updateValidity();
+    updateAndValidity && this.updateValidity();
   }
 
   hasValidator(validator: string | ValidationFn | AsyncValidatorFn) {
@@ -109,7 +109,7 @@ export abstract class AbstractControl {
       if (this._errors.value[error]) delete this._errors.value;
     }
     if (Object.keys(this._errors.value).length === 0) this._errors.value = null;
-    emitValidation && this._updateValidity();
+    emitValidation && this.updateValidity();
   }
 
   clearErrors() {
@@ -117,22 +117,22 @@ export abstract class AbstractControl {
     this._updateControlsStatus();
   }
 
-  _updateValidity() {
+  /**
+   * @param value control value
+   * @param onlySelf When true, each change only affects this control, and not its parent. Default is false. 
+   */
+  updateValidity(onlySelf?: boolean) {
     let errors: {} = null;
-    console.log({ errors })
     for (const validator of this._validators) {
       const validationError = validator(this) || null;
       if (validationError !== null) {
-        console.log({ validation_result: validationError })
         errors = { ...errors, ...validationError }
       }
     }
-    console.log({ after_validation: errors });
     this.setErrors(errors);
-    console.log({ this_erros: this._errors.value })
     this._status.value = this.calculateStatus();
     //if (this._status.value === ControlStatus.VALID) { this.runAsyncValidators(); }
-    this._parent.value?._updateValidity();
+    this._parent.value?.updateValidity(onlySelf);
   }
 
   _setParent(parent: FormGroup | FormArray | null) {
@@ -178,6 +178,6 @@ export abstract class AbstractControl {
 
   abstract get(path: string | string[]): AbstractControl | null;
   abstract value: any;
-  abstract setValue(value: any): void;
+  abstract setValue(value: any, onlySelf?: boolean): void;
   abstract reset(): void;
 }
