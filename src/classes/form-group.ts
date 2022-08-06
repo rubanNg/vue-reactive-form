@@ -28,7 +28,8 @@ export class FormGroup extends AbstractControl {
    */
   addControls(controls: { [key: string]: AbstractControl }, onlySelf?: boolean) {
     this.configureControls({ ...controls });
-    this.updateValidity(onlySelf);
+    this.updateValidity({ onlySelf });
+    this.setDirty(true, { onlySelf: true });
   }
 
   get(path: string | string[]): AbstractControl {
@@ -41,7 +42,8 @@ export class FormGroup extends AbstractControl {
    */
   setControl(name: string, control: AbstractControl, onlySelf?: boolean) {
     if(this._controls[name]) this._controls[name] = control;
-    this.updateValidity(onlySelf);
+    this.updateValidity({ onlySelf });
+    this.setDirty(true, { onlySelf: true });
   }
   
    /**
@@ -57,7 +59,8 @@ export class FormGroup extends AbstractControl {
           this._controls[name].setValue((value as { [key: string]: any })[name], true);
         }
       }
-      this.updateValidity(onlySelf)
+      this.updateValidity({ onlySelf });
+      this.setDirty(true, { onlySelf: true });
     }
   }
 
@@ -67,7 +70,8 @@ export class FormGroup extends AbstractControl {
    */
   removeControl(name: string, onlySelf?: boolean) {
     delete this._controls[name];
-    this.updateValidity(onlySelf);
+    this.updateValidity({ onlySelf });
+    this.setDirty(true, { onlySelf: true });
   }
 
   contains(name: string) {
@@ -77,6 +81,13 @@ export class FormGroup extends AbstractControl {
   reset() {
     for (const control in this._controls) this._controls[control].reset();
     this.clearErrors();
+  }
+
+  _isValidControl() {
+    for (const name in this._controls) {
+      if (!this._controls[name].valid) return false;
+    }
+    return this.errors === null;
   }
 
   private configureControls(controls: Record<string, AbstractControl>) {

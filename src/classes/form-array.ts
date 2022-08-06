@@ -6,6 +6,7 @@ import { AbstractControl } from "./abstract-conrol";
 
 export class FormArray extends AbstractControl {
 
+
   private _controls: AbstractControl[] = reactive([]);
 
   get controls(): AbstractControl[] { return this._controls; }
@@ -14,6 +15,7 @@ export class FormArray extends AbstractControl {
   constructor(controls: Array<AbstractControl>, validators: ValidationFn | ValidationFn[] = [], asyncValidators: AsyncValidatorFn | AsyncValidatorFn[] = []) {
     super(wrapToArray(validators), wrapToArray(asyncValidators));
     this.configureControls(controls);
+    this.updateValidity({ onlySelf: true });
   }
 
   /**
@@ -22,7 +24,8 @@ export class FormArray extends AbstractControl {
    */
   addControls(controls: Array<AbstractControl>, onlySelf?: boolean) {
     this.configureControls(controls);
-    this.updateValidity(onlySelf);
+    this.updateValidity({ onlySelf });
+    this.setDirty(true, { onlySelf: true });
   }
 
   /**
@@ -32,7 +35,8 @@ export class FormArray extends AbstractControl {
    */
   setControl(index: number, control: AbstractControl, onlySelf?: boolean) {
     if(this._controls[index]) this._controls[index] = control;
-    this.updateValidity(onlySelf);
+    this.updateValidity({ onlySelf });
+    this.setDirty(true, { onlySelf: true });
   }
 
   at(index: number): AbstractControl {
@@ -51,14 +55,15 @@ export class FormArray extends AbstractControl {
    * @param value control value
    * @param onlySelf When true, each change only affects this control, and not its parent. Default is false. 
    */
-  setValue(value: any[], onlySelf: boolean = false): void {
+  setValue(value: any[], onlySelf?: boolean): void {
     if(!isArray(value) || value.length === 0) return;
     for (let index = 0; index < value.length; index++) {
       if (this._controls?.[index]) {
         this._controls.at(index).setValue(value[index], true);
       } else break;
     }
-    this.updateValidity(onlySelf);
+    this.updateValidity({ onlySelf });
+    this.setDirty(true, { onlySelf: true });
   }
 
   /**
@@ -67,7 +72,8 @@ export class FormArray extends AbstractControl {
    */
   removeAt(index: number, onlySelf?: boolean) {
     this._controls.splice(index, 1);
-    this.updateValidity(onlySelf);
+    this.updateValidity({ onlySelf });
+    this.setDirty(true, { onlySelf: true });
   }
 
   reset() {
@@ -79,9 +85,17 @@ export class FormArray extends AbstractControl {
    * @param value control value
    * @param onlySelf When true, each change only affects this control, and not its parent. Default is false. 
    */
-  updateAt({ index, value }: { index: number, value: any }, onlySelf: boolean = false) {
+  updateAt({ index, value }: { index: number, value: any }, onlySelf?: boolean) {
     this._controls[index].setValue(value, true);
-    this.updateValidity(onlySelf); 
+    this.updateValidity({ onlySelf }); 
+    this.setDirty(true, { onlySelf: true });
+  }
+
+  _isValidControl() {
+    for (const control of this._controls) {
+      if (!control.valid) return false;
+    }
+    return this.errors === null;
   }
 
   private configureControls(controls: Array<AbstractControl>) {

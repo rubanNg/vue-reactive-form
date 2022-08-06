@@ -9,37 +9,49 @@ export abstract class AbstractControl {
   private _parent: { value: FormGroup | FormArray | null } = reactive({ value: null });
   private _validators: ValidationFn[] = reactive([]);
   private _asyncValidators: AsyncValidatorFn[] = reactive([]);
-  private _status: { value: ControlStatus } = reactive({ value: ControlStatus.VALID });
+  private _dirty: { value: boolean } = reactive({ value: false }) 
 
   get errors(): ValidationErrors  { return this._errors.value; };
   get parent() { return this._parent.value; }
-  get status(): ControlStatus { return this._status.value }
-  get valid() { return this._status.value === ControlStatus.VALID; }
+  get dirty() { return this._dirty.value; }
+  get valid() { return this._isValidControl(); }
   get root(): AbstractControl {
     let control: AbstractControl = this;
-    while (control._parent) {
-      control = control._parent as AbstractControl;
-    }
+    while (control._parent) { control = control._parent as AbstractControl;}
     return control;
   }
-
 
   constructor(validators: ValidationFn[], asyncValidators: AsyncValidatorFn[]) {
     this._validators = validators;
     this._asyncValidators = asyncValidators;
   }
   
+  /**
+   * 
+   * @param validators validators
+   * @param updateValidity if true, control will be rechecked, default false
+   */
   setValidators(validators: ValidationFn | ValidationFn[], updateValidity: boolean = false) {
     this._validators = wrapToArray(validators);
     updateValidity && this.updateValidity();
   }
 
+  /**
+   * 
+   * @param validators validators
+   * @param updateValidity if true, control will be rechecked, default false
+   */
   addValidators(validators: ValidationFn | ValidationFn[], updateValidity: boolean = false) {
     const distinct = this.distinctValidators(wrapToArray(validators));
     this._validators.push(...distinct);
     updateValidity && this.updateValidity();
   }
 
+  /**
+   * 
+   * @param validators validators
+   * @param updateValidity if true, control will be rechecked, default false
+   */
   removeValidators(validators: ValidationFn | ValidationFn[], updateValidity: boolean = false) {
     this._validators = this._validators.filter(validator => {
       return wrapToArray(validators).some(s => s === validator || s.name === validator.name) ? false : true;
@@ -47,11 +59,19 @@ export abstract class AbstractControl {
     updateValidity && this.updateValidity();
   }
   
+  /**
+   * 
+   * @param updateValidity if true, control will be rechecked, default false
+   */
   clearValidators(updateValidity: boolean = false) {
     this._validators = [];
     updateValidity && this.updateValidity();
   }
 
+  /**
+   * 
+   * @param updateValidity if true, control will be rechecked, default false
+   */
   clearAsyncValidators(updateValidity: boolean = false) {
     this._asyncValidators = [];
     updateValidity && this.updateValidity();
@@ -82,16 +102,13 @@ export abstract class AbstractControl {
 
   setErrors(errors: ValidationErrors) {
     this._errors.value = errors;
-    this.updateControlsStatus();
   }
 
-  addErrors(error: ValidationErrors) {
+  addErrors(errors: ValidationErrors) {
     this._errors.value = {
       ...this._errors.value,
-      ...error
+      ...errors
     };
-    this.updateControlsStatus();
-
   }
 
   getErrors(errorsNames: string | string[]) {
@@ -103,66 +120,55 @@ export abstract class AbstractControl {
     return errors;
   }
 
-  removeErrors(errorsNames: string | string[], emitValidation: boolean = false) {
-    if (!this._errors.value) return false;
+  removeErrors(errorsNames: string | string[]) {
+    if (!this._errors.value) return;
     for (const error of errorsNames) {
-      if (this._errors.value[error]) delete this._errors.value;
+      delete this._errors.value[error];
     }
     if (Object.keys(this._errors.value).length === 0) this._errors.value = null;
-    emitValidation && this.updateValidity();
   }
 
   clearErrors() {
     this._errors.value = null;
-    this.updateControlsStatus();
   }
 
+
   /**
-   * @param value control value
-   * @param onlySelf When true, each change only affects this control, and not its parent. Default is false. 
+   * @param options `onlySelf`  When true, each change only affects this control, and not its parent. Default is false. 
    */
-  updateValidity(onlySelf?: boolean) {
+  updateValidity(options: { onlySelf?: boolean } = {}) {
     let errors: {} = null;
     for (const validator of this._validators) {
       const validationError = validator(this) || null;
+      console.log([
+        { 
+          CONTROL: this, 
+          function: validator,
+          result: validationError,
+          erros: this._errors.value 
+        }
+      ])
       if (validationError !== null) {
         errors = { ...errors, ...validationError }
       }
     }
     this.setErrors(errors);
-    this._status.value = this.calculateStatus();
+    //this._status.value = this._calculateStatus();
+    //async validatords todo
     //if (this._status.value === ControlStatus.VALID) { this.runAsyncValidators(); }
-    this._parent.value?.updateValidity(onlySelf);
+    //async validatords
+    if (this._parent.value && !options.onlySelf) {
+      this._parent.value.updateValidity(options);
+    }
   }
 
   setParent(parent: FormGroup | FormArray | null) {
     this._parent.value = parent;
   }
 
-  updateControlsStatus() {
-    this._status.value = this.calculateStatus();
-    (this._parent.value as AbstractControl)?.updateControlsStatus();
-  }
-
-  private runAsyncValidators() {
-    this._status.value = ControlStatus.PENDING;
-    Promise.allSettled(this._asyncValidators.map(validator => validator(this))).then((validationResult) => {
-      let errors: ValidationErrors = {};
-      for (const result of validationResult) {
-        if (result.status === 'rejected') {
-          console.warn(`one or more validators were rejected`);
-          continue;
-        }
-        errors = { ...errors, ...result.value, }
-      }
-      this.setErrors(errors);
-      this.calculateStatus();
-    });
-  }
-
-  private calculateStatus() {
-    if (this._errors.value) return ControlStatus.INVALID;
-    else return ControlStatus.VALID;
+  setDirty(value: boolean, options: { onlySelf?: boolean } = {}) {
+    this._dirty.value = value;
+    this._parent.value?.setDirty(value, options);
   }
 
   private distinctValidators (validators: ValidationFn[]) {
@@ -177,7 +183,9 @@ export abstract class AbstractControl {
   }
 
   abstract get(path: string | string[]): AbstractControl | null;
-  abstract value: any;
+  abstract get value(): any;
+  abstract set value(v: any);
+  abstract _isValidControl(): boolean;
   abstract setValue(value: any, onlySelf?: boolean): void;
   abstract reset(): void;
 }

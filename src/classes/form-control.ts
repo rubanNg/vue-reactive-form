@@ -8,7 +8,9 @@ export class FormControl<T = string | number> extends AbstractControl {
   private _value = reactive({ value: null });
   private _listiners: ((event: T) => void)[] = [];
 
-  dirty: boolean = false;
+  get valid () {
+    return this.errors === null;
+  }
 
   get value(): T {
     return this._value.value;
@@ -22,6 +24,7 @@ export class FormControl<T = string | number> extends AbstractControl {
   constructor(value: T = null, validators: ValidationFn | ValidationFn[] = [], asyncValidators: AsyncValidatorFn | AsyncValidatorFn[] = []) {
     super(wrapToArray(validators), wrapToArray(asyncValidators));
     this._value.value = value ?? null;
+    this.updateValidity({ onlySelf: true });
   }
 
   get(path: string | string[]) {
@@ -49,14 +52,14 @@ export class FormControl<T = string | number> extends AbstractControl {
     this.value = value;
   }
 
-  setDirty(value: boolean) {
-    this.dirty = value;
+  _isValidControl() {
+    return this.errors !== null;
   }
 
   private onValueChange() {
     this._listiners.forEach(listener => listener(this._value.value))
     this.updateValidity();
-    !this.dirty && (this.dirty = true);
+    this.setDirty(true);
   }
 }
 

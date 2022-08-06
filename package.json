@@ -1,6 +1,6 @@
 {
   "name": "reactive-vue-form",
-  "version": "1.0.117",
+  "version": "1.0.121",
   "description": "",
   "main": "./dist/index.js",
   "scripts": {
