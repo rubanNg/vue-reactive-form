@@ -1,4 +1,4 @@
-import { reactive } from "vue";
+import { isProxy, reactive, toRaw } from "vue";
 import { AsyncValidatorFn, ValidationFn } from "../types";
 import { wrapToArray } from "../utils";
 import { AbstractControl } from "./abstract-conrol";
@@ -13,7 +13,7 @@ export class FormControl<T = string | number> extends AbstractControl {
   }
 
   get value(): T {
-    return this._value.value;
+    return isProxy(this._value.value) ? toRaw(this._value.value) : this._value.value;
   }
 
   set value(value) {
