@@ -94,10 +94,7 @@ export class FormArray extends AbstractControl {
   }
 
   _isValidControl() {
-    for (const control of this._controls) {
-      if (!control.valid) return false;
-    }
-    return this.errors === null;
+    return this._controls.every(control => control.valid) && this.errors === null;
   }
 
   private configureControls(controls: Array<AbstractControl>) {

@@ -84,10 +84,7 @@ export class FormGroup extends AbstractControl {
   }
 
   _isValidControl() {
-    for (const name in this._controls) {
-      if (!this._controls[name].valid) return false;
-    }
-    return this.errors === null;
+    return Object.entries(this._controls).every(([_, control]) => control.valid) && this.errors === null;
   }
 
   private configureControls(controls: Record<string, AbstractControl>) {

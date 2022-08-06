@@ -53,7 +53,7 @@ export class FormControl<T = string | number> extends AbstractControl {
   }
 
   _isValidControl() {
-    return this.errors !== null;
+    return this.errors === null;
   }
 
   private onValueChange() {
