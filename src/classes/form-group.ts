@@ -12,9 +12,9 @@ export class FormGroup extends AbstractControl {
   get controls() { return this._controls; }
   get value() {
     return Object.entries(this._controls).reduce((result: { [key: string]: any }, [name, control]) => {
-      result[name] = control.value;
+      result[name] = isProxy(control.value) ? toRaw(control.value) : control.value;
       return result;
-    }, {})
+    }, {});
   }
 
   constructor(controls: { [ key: string ]: AbstractControl }, validators: ValidationFn | ValidationFn[] = [], asyncValidators: AsyncValidatorFn | AsyncValidatorFn[] = []) {

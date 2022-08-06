@@ -140,14 +140,6 @@ export abstract class AbstractControl {
     let errors: {} = null;
     for (const validator of this._validators) {
       const validationError = validator(this) || null;
-      console.log([
-        { 
-          CONTROL: this, 
-          function: validator,
-          result: validationError,
-          erros: this._errors.value 
-        }
-      ])
       if (validationError !== null) {
         errors = { ...errors, ...validationError }
       }

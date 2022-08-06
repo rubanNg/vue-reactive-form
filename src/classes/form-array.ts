@@ -10,7 +10,9 @@ export class FormArray extends AbstractControl {
   private _controls: AbstractControl[] = reactive([]);
 
   get controls(): AbstractControl[] { return this._controls; }
-  get value(): (string | number)[] { return this._controls.map(control => control.value); }
+  get value(): (string | number)[] {
+    return this._controls.map(({ value }) => isProxy(value) ? toRaw(value) : value);
+  }
 
   constructor(controls: Array<AbstractControl>, validators: ValidationFn | ValidationFn[] = [], asyncValidators: AsyncValidatorFn | AsyncValidatorFn[] = []) {
     super(wrapToArray(validators), wrapToArray(asyncValidators));
