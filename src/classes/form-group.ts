@@ -7,11 +7,9 @@ import { AbstractControl } from "./abstract-conrol";
 
 export class FormGroup extends AbstractControl {
 
-
   private _controls: { [key: string]: AbstractControl } = reactive({});
 
   get controls() { return this._controls; }
-
   get value() {
     return Object.entries(this._controls).reduce((result: { [key: string]: any }, [name, control]) => {
       result[name] = control.value;
@@ -84,7 +82,7 @@ export class FormGroup extends AbstractControl {
   private configureControls(controls: Record<string, AbstractControl>) {
     for (const name in controls) {
       this._controls[name] = controls[name];
-      this._controls[name]._setParent(this);
+      this._controls[name].setParent(this);
     }
   }
 }

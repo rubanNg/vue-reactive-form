@@ -1,9 +1,9 @@
-import { isProxy, Ref, reactive, toRaw } from "vue";
+import { reactive } from "vue";
 import { AsyncValidatorFn, ValidationFn } from "../types";
 import { wrapToArray } from "../utils";
 import { AbstractControl } from "./abstract-conrol";
 
-export class FormControl<T = any> extends AbstractControl {
+export class FormControl<T = string | number> extends AbstractControl {
 
   private _value = reactive({ value: null });
   private _listiners: ((event: T) => void)[] = [];
@@ -25,10 +25,14 @@ export class FormControl<T = any> extends AbstractControl {
   }
 
   get(path: string | string[]) {
-    return null as AbstractControl;
+    return this;
   }
 
-
+  /**
+   * 
+   * @param listener listener
+   * @returns unsubscribe function
+   */
   valueChanges(listener: (value: T) => void) {
     this._listiners.push(listener);
     return (() => {
@@ -41,7 +45,7 @@ export class FormControl<T = any> extends AbstractControl {
     this.clearErrors();
   };
 
-  setValue(value: any) {
+  setValue(value: T) {
     this.value = value;
   }
 

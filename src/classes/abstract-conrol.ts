@@ -1,7 +1,7 @@
 import { reactive } from "vue";
 import { FormArray, FormGroup } from "..";
 import { AsyncValidatorFn, ControlStatus, ValidationErrors, ValidationFn } from "../types";
-import { find, isAsyncFunction, isPromise, wrapToArray } from "../utils";
+import { wrapToArray } from "../utils";
 
 export abstract class AbstractControl { 
 
@@ -29,32 +29,32 @@ export abstract class AbstractControl {
     this._asyncValidators = asyncValidators;
   }
   
-  setValidators(validators: ValidationFn | ValidationFn[], updateAndValidity: boolean = false) {
+  setValidators(validators: ValidationFn | ValidationFn[], updateValidity: boolean = false) {
     this._validators = wrapToArray(validators);
-    updateAndValidity && this.updateValidity();
+    updateValidity && this.updateValidity();
   }
 
-  addValidators(validators: ValidationFn | ValidationFn[], updateAndValidity: boolean = false) {
+  addValidators(validators: ValidationFn | ValidationFn[], updateValidity: boolean = false) {
     const distinct = this.distinctValidators(wrapToArray(validators));
     this._validators.push(...distinct);
-    updateAndValidity && this.updateValidity();
+    updateValidity && this.updateValidity();
   }
 
-  removeValidators(validators: ValidationFn | ValidationFn[], updateAndValidity: boolean = false) {
+  removeValidators(validators: ValidationFn | ValidationFn[], updateValidity: boolean = false) {
     this._validators = this._validators.filter(validator => {
       return wrapToArray(validators).some(s => s === validator || s.name === validator.name) ? false : true;
     });
-    updateAndValidity && this.updateValidity();
+    updateValidity && this.updateValidity();
   }
   
-  clearValidators(updateAndValidity: boolean = false) {
+  clearValidators(updateValidity: boolean = false) {
     this._validators = [];
-    updateAndValidity && this.updateValidity();
+    updateValidity && this.updateValidity();
   }
 
-  clearAsyncValidators(updateAndValidity: boolean = false) {
+  clearAsyncValidators(updateValidity: boolean = false) {
     this._asyncValidators = [];
-    updateAndValidity && this.updateValidity();
+    updateValidity && this.updateValidity();
   }
 
   hasValidator(validator: string | ValidationFn | AsyncValidatorFn) {
@@ -82,7 +82,7 @@ export abstract class AbstractControl {
 
   setErrors(errors: ValidationErrors) {
     this._errors.value = errors;
-    this._updateControlsStatus();
+    this.updateControlsStatus();
   }
 
   addErrors(error: ValidationErrors) {
@@ -90,7 +90,7 @@ export abstract class AbstractControl {
       ...this._errors.value,
       ...error
     };
-    this._updateControlsStatus();
+    this.updateControlsStatus();
 
   }
 
@@ -114,7 +114,7 @@ export abstract class AbstractControl {
 
   clearErrors() {
     this._errors.value = null;
-    this._updateControlsStatus();
+    this.updateControlsStatus();
   }
 
   /**
@@ -135,13 +135,13 @@ export abstract class AbstractControl {
     this._parent.value?.updateValidity(onlySelf);
   }
 
-  _setParent(parent: FormGroup | FormArray | null) {
+  setParent(parent: FormGroup | FormArray | null) {
     this._parent.value = parent;
   }
 
-  _updateControlsStatus() {
+  updateControlsStatus() {
     this._status.value = this.calculateStatus();
-    this._parent.value?._updateControlsStatus();
+    (this._parent.value as AbstractControl)?.updateControlsStatus();
   }
 
   private runAsyncValidators() {
