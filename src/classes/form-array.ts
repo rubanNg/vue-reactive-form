@@ -27,7 +27,7 @@ export class FormArray extends AbstractControl {
   addControls(controls: Array<AbstractControl>, onlySelf?: boolean) {
     this.configureControls(controls);
     this.updateValidity({ onlySelf });
-    this.setDirty(true, { onlySelf: true });
+    this.setDirty(true, { onlySelf });
   }
 
   /**
@@ -38,7 +38,7 @@ export class FormArray extends AbstractControl {
   setControl(index: number, control: AbstractControl, onlySelf?: boolean) {
     if(this._controls[index]) this._controls[index] = control;
     this.updateValidity({ onlySelf });
-    this.setDirty(true, { onlySelf: true });
+    this.setDirty(true, { onlySelf });
   }
 
   at(index: number): AbstractControl {
@@ -65,7 +65,7 @@ export class FormArray extends AbstractControl {
       } else break;
     }
     this.updateValidity({ onlySelf });
-    this.setDirty(true, { onlySelf: true });
+    this.setDirty(true, { onlySelf });
   }
 
   /**
@@ -75,9 +75,12 @@ export class FormArray extends AbstractControl {
   removeAt(index: number, onlySelf?: boolean) {
     this._controls.splice(index, 1);
     this.updateValidity({ onlySelf });
-    this.setDirty(true, { onlySelf: true });
+    this.setDirty(true, { onlySelf });
   }
 
+  /**
+   * resets child controls values and removes errors
+   */
   reset() {
     for (const control of this._controls) control.reset();
     this.clearErrors();
@@ -90,7 +93,7 @@ export class FormArray extends AbstractControl {
   updateAt({ index, value }: { index: number, value: any }, onlySelf?: boolean) {
     this._controls[index].setValue(value, true);
     this.updateValidity({ onlySelf }); 
-    this.setDirty(true, { onlySelf: true });
+    this.setDirty(true, { onlySelf });
   }
 
   _isValidControl() {

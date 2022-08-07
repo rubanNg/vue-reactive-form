@@ -19,7 +19,11 @@ export class FormGroup extends AbstractControl {
 
   constructor(controls: { [ key: string ]: AbstractControl }, validators: ValidationFn | ValidationFn[] = [], asyncValidators: AsyncValidatorFn | AsyncValidatorFn[] = []) {
     super(wrapToArray(validators), wrapToArray(asyncValidators));
-    this.configureControls(controls);
+    for (const name in controls) {
+      this._controls[name] = controls[name];
+      this._controls[name].setParent(this);
+    }
+    this.updateValidity({ onlySelf: true });
   }
 
   /**
@@ -27,7 +31,10 @@ export class FormGroup extends AbstractControl {
    * @param onlySelf When true, each change only affects this control, and not its parent. Default is false. 
    */
   addControls(controls: { [key: string]: AbstractControl }, onlySelf?: boolean) {
-    this.configureControls({ ...controls });
+    for (const name in controls) {
+      this._controls[name] = controls[name];
+      this._controls[name].setParent(this);
+    }
     this.updateValidity({ onlySelf });
     this.setDirty(true, { onlySelf: true });
   }
@@ -41,9 +48,12 @@ export class FormGroup extends AbstractControl {
    * @param onlySelf When true, each change only affects this control, and not its parent. Default is false. 
    */
   setControl(name: string, control: AbstractControl, onlySelf?: boolean) {
-    if(this._controls[name]) this._controls[name] = control;
+    if(this._controls[name]) {
+      control.setParent(this);
+      this._controls[name] = control;
+    }
     this.updateValidity({ onlySelf });
-    this.setDirty(true, { onlySelf: true });
+    this.setDirty(true, { onlySelf });
   }
   
    /**
@@ -60,7 +70,7 @@ export class FormGroup extends AbstractControl {
         }
       }
       this.updateValidity({ onlySelf });
-      this.setDirty(true, { onlySelf: true });
+      this.setDirty(true, { onlySelf });
     }
   }
 
@@ -71,13 +81,16 @@ export class FormGroup extends AbstractControl {
   removeControl(name: string, onlySelf?: boolean) {
     delete this._controls[name];
     this.updateValidity({ onlySelf });
-    this.setDirty(true, { onlySelf: true });
+    this.setDirty(true, { onlySelf });
   }
 
   contains(name: string) {
     return Boolean(this._controls[name])
   }
   
+   /**
+   * resets child controls values and removes errors
+   */
   reset() {
     for (const control in this._controls) this._controls[control].reset();
     this.clearErrors();
@@ -85,12 +98,5 @@ export class FormGroup extends AbstractControl {
 
   _isValidControl() {
     return Object.entries(this._controls).every(([_, control]) => control.valid) && this.errors === null;
-  }
-
-  private configureControls(controls: Record<string, AbstractControl>) {
-    for (const name in controls) {
-      this._controls[name] = controls[name];
-      this._controls[name].setParent(this);
-    }
   }
 }

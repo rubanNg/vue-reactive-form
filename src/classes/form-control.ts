@@ -43,13 +43,22 @@ export class FormControl<T = string | number> extends AbstractControl {
     }).bind(this);
   }
 
+   /**
+   * resets value and removes errors
+   */
   reset() {
     this.value = null;
     this.clearErrors();
   };
 
-  setValue(value: T) {
+  /**
+   * sets the value of control
+   * @param value new control value
+   */
+  setValue(value: T, onlySelf?: boolean) {
     this.value = value;
+    this.updateValidity({ onlySelf });
+    this.setDirty(true, { onlySelf });
   }
 
   _isValidControl() {

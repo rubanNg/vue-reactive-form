@@ -145,10 +145,6 @@ export abstract class AbstractControl {
       }
     }
     this.setErrors(errors);
-    //this._status.value = this._calculateStatus();
-    //async validatords todo
-    //if (this._status.value === ControlStatus.VALID) { this.runAsyncValidators(); }
-    //async validatords
     if (this._parent.value && !options.onlySelf) {
       this._parent.value.updateValidity(options);
     }
@@ -158,6 +154,10 @@ export abstract class AbstractControl {
     this._parent.value = parent;
   }
 
+  /**
+   * @param options `onlySelf` if `true` sets 'dirty' for this control only. 
+   * By defaults sets `value` also on the parent
+   */
   setDirty(value: boolean, options: { onlySelf?: boolean } = {}) {
     this._dirty.value = value;
     this._parent.value?.setDirty(value, options);
