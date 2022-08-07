@@ -57,7 +57,7 @@ export function find(parent: FormGroup | FormArray, path: string | string[]) {
 }
 
 export function toRecord<T = any>(value: any): Record<string, T> {
-  if (isObject(value)) return value as Record<string, T>;
+  if (isObject<Record<string, T>>(value)) return value;
   if (isArray(value)) {
     return value.reduce((result: Record<string, T>, arrayValue: T, index: number) => {
       result[index] = arrayValue;
@@ -84,25 +84,12 @@ export function isArray(value: any): value is any[] {
   return toString.call(value) === "[object Array]"
 }
 
-export function isObject(value: any): value is {} {
+export function isObject<T>(value: T): value is T {
   return toString.call(value) === "[object Object]"
 }
 
 export function isPrimitive(value: any) {
-  const types = ["boolean", "number", "string"];
-  return types.includes(typeof value);
-}
-
-export function interceptControlsGetters<T>(object: any): T {
-  return new Proxy(object, {
-    get(target, property) {
-      if (property in target) {
-        return Reflect.get(target, property);
-      } else if (property in (target.controls || {})) {
-        return Reflect.get(target.controls, property);
-      } else return null;
-    }
-  })
+  return ["boolean", "number", "string"].includes(typeof value);
 }
 
 export function isAsyncFunction(fn: Function) {

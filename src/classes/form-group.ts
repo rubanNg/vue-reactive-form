@@ -63,15 +63,15 @@ export class FormGroup extends AbstractControl {
   setValue(value: { [key: string]: any }, options: { onlySelf?: boolean } = {}) {
     if (!isObject(value) || Object.keys(value).length === 0) {
       console.error('"setValue" function argument must be a plain object');
-    } else {
-      for (const name in value) {
-        if (this._controls?.[name]) {
-          this._controls[name].setValue((value as { [key: string]: any })[name], options);
-        }
-      }
-      this.updateValidity(options);
-      this.setDirty(true, options);
+      return;
     }
+    for (const name in value) {
+      if (this._controls?.[name]) {
+        this._controls[name].setValue(value[name], options);
+      }
+    }
+    this.updateValidity(options);
+    this.setDirty(true, options);
   }
 
   /**
