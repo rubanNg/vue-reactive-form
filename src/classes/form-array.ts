@@ -16,7 +16,10 @@ export class FormArray extends AbstractControl {
 
   constructor(controls: Array<AbstractControl>, validators: ValidationFn | ValidationFn[] = [], asyncValidators: AsyncValidatorFn | AsyncValidatorFn[] = []) {
     super(wrapToArray(validators), wrapToArray(asyncValidators));
-    this.configureControls(controls);
+    this._controls = controls.map(control => {
+      control.setParent(this);
+      return control;
+    });
     this.updateValidity({ onlySelf: true });
   }
 
@@ -24,21 +27,24 @@ export class FormArray extends AbstractControl {
    * @param controls AbstractControl list
    * @param onlySelf When true, each change only affects this control, and not its parent. Default is false. 
    */
-  addControls(controls: Array<AbstractControl>, onlySelf?: boolean) {
-    this.configureControls(controls);
-    this.updateValidity({ onlySelf });
-    this.setDirty(true, { onlySelf });
+  addControls(controls: Array<AbstractControl>, options: { onlySelf?: boolean } = {}) {
+    this._controls.push(...controls.map(control => {
+      control.setParent(this);
+      return control;
+    }));
+    this.updateValidity(options);
+    this.setDirty(true, options);
   }
 
   /**
    * @param index control index
-   * @param control control AbstractControl
+   * @param control control `AbstractControl`
    * @param onlySelf When true, each change only affects this control, and not its parent. Default is false. 
    */
-  setControl(index: number, control: AbstractControl, onlySelf?: boolean) {
+  setControl(index: number, control: AbstractControl, options: { onlySelf?: boolean } = {}) {
     if(this._controls[index]) this._controls[index] = control;
-    this.updateValidity({ onlySelf });
-    this.setDirty(true, { onlySelf });
+    this.updateValidity(options);
+    this.setDirty(true, options);
   }
 
   at(index: number): AbstractControl {
@@ -57,25 +63,25 @@ export class FormArray extends AbstractControl {
    * @param value control value
    * @param onlySelf When true, each change only affects this control, and not its parent. Default is false. 
    */
-  setValue(value: any[], onlySelf?: boolean): void {
+  setValue(value: any[], options: { onlySelf?: boolean } = {}): void {
     if(!isArray(value) || value.length === 0) return;
     for (let index = 0; index < value.length; index++) {
       if (this._controls?.[index]) {
-        this._controls.at(index).setValue(value[index], true);
+        this._controls.at(index).setValue(value[index], options);
       } else break;
     }
-    this.updateValidity({ onlySelf });
-    this.setDirty(true, { onlySelf });
+    this.updateValidity(options);
+    this.setDirty(true, options);
   }
 
   /**
    * @param index control index
    * @param onlySelf When true, each change only affects this control, and not its parent. Default is false. 
    */
-  removeAt(index: number, onlySelf?: boolean) {
+  removeAt(index: number, options: { onlySelf?: boolean } = {}) {
     this._controls.splice(index, 1);
-    this.updateValidity({ onlySelf });
-    this.setDirty(true, { onlySelf });
+    this.updateValidity(options);
+    this.setDirty(true, options);
   }
 
   /**
@@ -90,20 +96,13 @@ export class FormArray extends AbstractControl {
    * @param value control value
    * @param onlySelf When true, each change only affects this control, and not its parent. Default is false. 
    */
-  updateAt({ index, value }: { index: number, value: any }, onlySelf?: boolean) {
-    this._controls[index].setValue(value, true);
-    this.updateValidity({ onlySelf }); 
-    this.setDirty(true, { onlySelf });
+  updateAt({ index, value }: { index: number, value: any }, options: { onlySelf?: boolean } = {}) {
+    this._controls[index].setValue(value, options);
+    this.updateValidity(options); 
+    this.setDirty(true, options);
   }
 
   _isValidControl() {
     return this._controls.every(control => control.valid) && this.errors === null;
-  }
-
-  private configureControls(controls: Array<AbstractControl>) {
-    for (const control of controls) {
-      control.setParent(this);
-      this._controls.push(control);
-    }
   }
 }

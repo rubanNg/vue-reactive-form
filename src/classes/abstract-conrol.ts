@@ -160,7 +160,9 @@ export abstract class AbstractControl {
    */
   setDirty(value: boolean, options: { onlySelf?: boolean } = {}) {
     this._dirty.value = value;
-    this._parent.value?.setDirty(value, options);
+    if (this._parent.value && !options.onlySelf) {
+      this._parent.value.setDirty(value, options);
+    }
   }
 
   private distinctValidators (validators: ValidationFn[]) {
@@ -178,6 +180,6 @@ export abstract class AbstractControl {
   abstract get value(): any;
   abstract set value(v: any);
   abstract _isValidControl(): boolean;
-  abstract setValue(value: any, onlySelf?: boolean): void;
+  abstract setValue(value: any, options:{ onlySelf?: boolean }): void;
   abstract reset(): void;
 }

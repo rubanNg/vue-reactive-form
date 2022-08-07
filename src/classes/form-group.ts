@@ -36,7 +36,7 @@ export class FormGroup extends AbstractControl {
       this._controls[name].setParent(this);
     }
     this.updateValidity({ onlySelf });
-    this.setDirty(true, { onlySelf: true });
+    this.setDirty(true, { onlySelf });
   }
 
   get(path: string | string[]): AbstractControl {
@@ -60,17 +60,17 @@ export class FormGroup extends AbstractControl {
    * @param value controls value
    * @param onlySelf When true, each change only affects this control, and not its parent. Default is false. 
    */
-  setValue(value: { [key: string]: any }, onlySelf?: boolean) {
+  setValue(value: { [key: string]: any }, options: { onlySelf?: boolean } = {}) {
     if (!isObject(value) || Object.keys(value).length === 0) {
       console.error('"setValue" function argument must be a plain object');
     } else {
       for (const name in value) {
         if (this._controls?.[name]) {
-          this._controls[name].setValue((value as { [key: string]: any })[name], true);
+          this._controls[name].setValue((value as { [key: string]: any })[name], options);
         }
       }
-      this.updateValidity({ onlySelf });
-      this.setDirty(true, { onlySelf });
+      this.updateValidity(options);
+      this.setDirty(true, options);
     }
   }
 

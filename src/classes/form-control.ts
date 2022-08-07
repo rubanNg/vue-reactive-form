@@ -27,8 +27,8 @@ export class FormControl<T = string | number> extends AbstractControl {
     this.updateValidity({ onlySelf: true });
   }
 
-  get(path: string | string[]) {
-    return this;
+  get(path: string | string[]): AbstractControl {
+    return this as AbstractControl;
   }
 
   /**
@@ -36,7 +36,7 @@ export class FormControl<T = string | number> extends AbstractControl {
    * @param listener listener
    * @returns unsubscribe function
    */
-  valueChanges(listener: (value: T) => void) {
+   valueChanged(listener: (value: T) => void) {
     this._listiners.push(listener);
     return (() => {
       this._listiners = this._listiners.filter(l => l !== listener);
@@ -55,10 +55,10 @@ export class FormControl<T = string | number> extends AbstractControl {
    * sets the value of control
    * @param value new control value
    */
-  setValue(value: T, onlySelf?: boolean) {
+  setValue(value: T, options: { onlySelf?: boolean } = {}) {
     this.value = value;
-    this.updateValidity({ onlySelf });
-    this.setDirty(true, { onlySelf });
+    this.updateValidity(options);
+    this.setDirty(true, options);
   }
 
   _isValidControl() {
