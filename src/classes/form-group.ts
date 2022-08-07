@@ -30,13 +30,13 @@ export class FormGroup extends AbstractControl {
    * @param controls controls list
    * @param onlySelf When true, each change only affects this control, and not its parent. Default is false. 
    */
-  addControls(controls: { [key: string]: AbstractControl }, onlySelf?: boolean) {
+  addControls(controls: { [key: string]: AbstractControl }, options: { onlySelf?: boolean } = {}) {
     for (const name in controls) {
       this._controls[name] = controls[name];
       this._controls[name].setParent(this);
     }
-    this.updateValidity({ onlySelf });
-    this.setDirty(true, { onlySelf });
+    this.updateValidity(options);
+    this.setDirty(true, options);
   }
 
   get(path: string | string[]): AbstractControl {
@@ -47,13 +47,13 @@ export class FormGroup extends AbstractControl {
    * @param name control name
    * @param onlySelf When true, each change only affects this control, and not its parent. Default is false. 
    */
-  setControl(name: string, control: AbstractControl, onlySelf?: boolean) {
+  setControl(name: string, control: AbstractControl, options: { onlySelf?: boolean } = {}) {
     if(this._controls[name]) {
       control.setParent(this);
       this._controls[name] = control;
     }
-    this.updateValidity({ onlySelf });
-    this.setDirty(true, { onlySelf });
+    this.updateValidity(options);
+    this.setDirty(true, options);
   }
   
    /**
@@ -78,10 +78,10 @@ export class FormGroup extends AbstractControl {
    * @param value control name
    * @param onlySelf When true, each change only affects this control, and not its parent. Default is false. 
    */
-  removeControl(name: string, onlySelf?: boolean) {
+  removeControl(name: string, options: { onlySelf?: boolean } = {}) {
     delete this._controls[name];
-    this.updateValidity({ onlySelf });
-    this.setDirty(true, { onlySelf });
+    this.updateValidity(options);
+    this.setDirty(true, options);
   }
 
   contains(name: string) {
