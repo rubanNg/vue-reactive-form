@@ -1,15 +1,4 @@
-import { AbstractControl } from "./classes/abstract-conrol";
-import { FormArray } from "./classes/form-array";
-import { FormControl } from "./classes/form-control";
-import { FormGroup } from "./classes/form-group";
-import { Validators } from "./classes/validators";
-import { formControlDirective } from "./directives/form-control.directive";
-
-export {
-  FormGroup,
-  FormControl,
-  FormArray,
-  AbstractControl,
-  Validators,
-  formControlDirective,
-}
+export { AbstractControl } from './package/lib/abstract-conrol';
+export { FormArray } from './package/lib/form-array';
+export { FormControl } from './package/lib/form-control';
+export { FormGroup } from './package/lib/form-group';
