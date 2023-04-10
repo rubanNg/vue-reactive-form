@@ -55,8 +55,8 @@ export class FormArray extends AbstractControl {
     this.setDirty(true, options);
   }
 
-  at(index: number): AbstractControl {
-    return this._controls[index];
+  at<TResult extends AbstractControl>(index: number): AbstractControl {
+    return this._controls[index] as TResult;
   }
 
   contains(index: number) {

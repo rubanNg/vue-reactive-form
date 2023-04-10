@@ -76,6 +76,10 @@ export class FormGroup extends AbstractControl {
     this.setDirty(true, options);
   }
 
+  at<TResult extends AbstractControl>(name: string): AbstractControl {
+    return this._controls[name] as TResult;
+  }
+
   contains(controlName: string) {
     return controlName in this._controls;
   }
