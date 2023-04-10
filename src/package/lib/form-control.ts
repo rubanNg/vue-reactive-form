@@ -42,7 +42,7 @@ export class FormControl extends AbstractControl {
   };
 
   setValue(value: any, options: ControlUpdateOptions = { updateParentValidity: true }) {
-    this._value = value;
+    this._value.value = value;
     this._listiners.forEach(listener => listener(this._value.value))
     this.updateValidity(options);
     this.setDirty(true, options);
