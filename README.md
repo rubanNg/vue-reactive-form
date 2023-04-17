@@ -1,6 +1,20 @@
+```html
+  <input type="text" v-model="control.value" />
+```
+
+```js
+// simple control with validator
+  const control = new FromControl('defaultValue', [
+    (control) => (control as FormControl).value == 1 ? null: { notOne: 'must be 1' } 
+  ]);
+```
+
+
+
+
 ```js 
 // simple control with validator
-const control = new FromControl('defaulrvalue', [
+const control = new FromControl('defaultValue', [
   (control) => (control as FormControl).value == 1 ? null: { notOne: 'must be 1' } 
 ]);
 
@@ -27,14 +41,14 @@ control.hasError('errorName');
 // contains all errors
 control.hasErrors(['error1', 'error3']);
 // contains any error
-control.hasAnyError['error1', 'error3']);
+control.hasAnyError(['error1', 'error3']);
 
 // form group
 const group = new FormGroup({
     name: new FromControl(),
     age: new FromControl(0, [
       (control) => (control as FormControl).value < 18 ? null: { small: 'invalid value' } 
-    ]);
+    ]),
     period: new FormGroup({
         dateStart: new FormControl(new Date()),
         dateEnd: new FormControl(new Date()),
@@ -57,23 +71,43 @@ group.removeControl('subName');
 
 //form array
 
-const array = new FormArray([
-    new FormGroup({
-        values: new FormArray([
-            new FormControl('value 1'),
-            new FormControl('value 1'),
-            new FormControl('value 1'),
-            new FormGroup({
-                subValues:  new FormArray([
-                    new FormControl('subvalue1'),
-                ])
-            }),
-        ]),
-    })
+const formArray = new FormArray([
+  new FormGroup({
+    values: new FormArray([
+      new FormControl('value 1'),
+      new FormControl('value 1'),
+      new FormControl('value 1'),
+      new FormGroup({
+        subValues: new FormArray([
+          new FormControl('subvalue1'),
+        ])
+      }),
+    ]),
+  })
 ]);
 
 // get nested control
 const formArraySubValues = array.period[0].values[3].subValues as FormArray;
 // or
-const endDate = group.get<FormControl>('period.0.values.3.subValues');
+const subValue1 = group.get<FormArray>('period.0.values.3.subValues.0');
+
+const controlsOfFormArray = formArray.controls;
+
+const formGroup_values = formArray.at(0).get('values');
 ```
+
+```html
+  <template v-for="control in controlsOfFormArray">
+    <template v-if="control instanceof FormControl">
+      <input v-model="control.value" />
+    </template>
+    <template v-else>
+      <template v-for="subControl in control.subValues)">
+        <input v-model="subControl.value" />
+      </template> 
+    </template> 
+  </template>  
+```
+
+
+
