@@ -1,11 +1,13 @@
-```html
-<h1>How run examples</h1>
+
+How run examples
+
 devDependencies
-<h3>yarn</h3>
-<h3>npm i</h3>
+yarn
+npm i
+
 run
-<h3>yarn dev</h3>
-<h3>npm run dev</h3>
-```
+yarn dev
+npm run dev
+
 
 
