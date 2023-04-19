@@ -9,7 +9,7 @@ export class FormControl extends AbstractControl {
   constructor(value: any = null, validators: ValidationFn[] = [], asyncValidators: AsyncValidationFn[] = []) {
     super(validators, asyncValidators);
     this._value.value = value;
-    this.updateValidity({ updateParentValidity: false });
+    this.updateValidity({ updateParentValidity: false, runAsyncValidators: false });
   }
 
   get value(): any {
@@ -17,7 +17,7 @@ export class FormControl extends AbstractControl {
   }
 
   set value(value: any) {
-    this.setValue(value, { updateParentValidity: true });
+    this.setValue(value);
   }
 
   get valueChange(): ValueSubscribtion {
@@ -37,14 +37,15 @@ export class FormControl extends AbstractControl {
   };
 
   reset() {
-    this.setValue(null, { updateParentValidity: true });
+    this._value.value = null;
+    this.setDirty(false);
     this.clearErrors();
   };
 
-  setValue(value: any, options: ControlUpdateOptions = { updateParentValidity: true }) {
+  setValue(value: any, { updateParentValidity = true, runAsyncValidators = true, updateParentDirty = true }: ControlUpdateOptions = {}) {
     this._value.value = value;
     this._listiners.forEach(listener => listener(this._value.value))
-    this.updateValidity(options);
-    this.setDirty(true, options);
+    this.updateValidity({ updateParentValidity, runAsyncValidators });
+    this.setDirty(true, updateParentDirty);
   }
 }

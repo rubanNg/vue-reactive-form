@@ -1,13 +1,13 @@
 <script setup lang="ts">
+import FormControl from './FormControl.vue'
+import FormGroup from './FormGroup.vue'
 </script>
 
 <template>
   <div class="container">
-    <h2>Examples</h2>
-    <ul>
-      <li>1</li>
-      <li>2</li>
-    </ul>
+    <FormControl />
+    <hr>
+    <FormGroup />
   </div>
 </template>
 

@@ -14,7 +14,7 @@ export class FormArray extends AbstractControl {
     super(validators, asyncValidators);
     this._controls = this._setUpControls(controls);
     this.updateDynamicProperties();
-    this.updateValidity({ updateParentValidity: false });
+    this.updateValidity({ updateParentValidity: false, runAsyncValidators: false });
   }
 
   get controls(): AbstractControl[] {
@@ -36,23 +36,23 @@ export class FormArray extends AbstractControl {
     return findFormControl(this, path) as TResult;
   }
 
-  addControl(control: AbstractControl, options: ControlUpdateOptions = { updateParentValidity: true }) {
+  addControl(control: AbstractControl, { updateParentValidity = true, runAsyncValidators = false, updateParentDirty = true }: ControlUpdateOptions = {}) {
     control.setParent(this as AbstractControl);
     this._controls.push(control);
     this.updateDynamicProperties();
-    this.updateValidity(options);
-    this.setDirty(true, options);
+    this.updateValidity({ updateParentValidity, runAsyncValidators });
+    this.setDirty(true, updateParentDirty);
   }
 
-  setControl(index: number, control: AbstractControl, options: ControlUpdateOptions = { updateParentValidity: true }) {
+  setControl(index: number, control: AbstractControl, { updateParentValidity = true, runAsyncValidators = false, updateParentDirty = true }: ControlUpdateOptions = {}) {
     if(!this.at(index)) {
       return;
     };
 
     this._controls[index] = control;
     this._controls[index].setParent(this as AbstractControl);
-    this.updateValidity(options);
-    this.setDirty(true, options);
+    this.updateValidity({ updateParentValidity, runAsyncValidators });
+    this.setDirty(true, updateParentDirty);
   }
 
   at<TResult extends AbstractControl>(index: number): AbstractControl {
@@ -63,19 +63,19 @@ export class FormArray extends AbstractControl {
     return !!this.at(index);
   }
 
-  setValue(value: any[], options: ControlUpdateOptions = { updateParentValidity: true }): void {
+  setValue(value: any[], { updateParentValidity = true, runAsyncValidators = true, updateParentDirty = true }: ControlUpdateOptions = {}): void {
     this._controls.forEach((contol, index) => {
-      contol.setValue(value[index], options);
+      contol.setValue(value[index], { updateParentValidity, runAsyncValidators });
     });
 
-    this.setDirty(true, options);
+    this.setDirty(true, updateParentDirty);
   }
 
-  removeAt(index: number, options: ControlUpdateOptions = { updateParentValidity: true }) {
+  removeAt(index: number, { updateParentValidity = true, runAsyncValidators = false, updateParentDirty = true }: ControlUpdateOptions = {}) {
     this._controls.splice(index, 1);
     this.updateDynamicProperties();
-    this.updateValidity(options);
-    this.setDirty(true, options);
+    this.updateValidity({ updateParentValidity, runAsyncValidators });
+    this.setDirty(true, updateParentDirty);
   }
 
   reset() {
@@ -85,9 +85,9 @@ export class FormArray extends AbstractControl {
     this.clearErrors();
   }
 
-  updateAt(index: number, value: any | number, options: ControlUpdateOptions = { updateParentValidity: true }) {
-    this.at(index).setValue(value, options);
-    this.setDirty(true, options);
+  updateAt(index: number, value: any, { updateParentValidity = true, runAsyncValidators = true, updateParentDirty = true }: ControlUpdateOptions = {}) {
+    this.at(index).setValue(value, { updateParentValidity, runAsyncValidators });
+    this.setDirty(true, updateParentDirty);
   }
 
   private _setUpControls(controls: AbstractControl[]) {
@@ -98,11 +98,9 @@ export class FormArray extends AbstractControl {
   }
 
   private updateDynamicProperties() {
-    const formArray = this;
-
-    formArray._controls.forEach((_, index) => {
-      Object.defineProperty(formArray, index, {
-        get: () => formArray.at(index),
+    this._controls.forEach((_, index) => {
+      Object.defineProperty(this, index, {
+        get: () => this.at(index),
         configurable: true,
         enumerable: true,
       });
