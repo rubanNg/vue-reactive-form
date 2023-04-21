@@ -1,13 +1,4 @@
-
-How run examples
-
-devDependencies
-yarn
-npm i
-
-run
-yarn dev
-npm run dev
+<iframe src="https://stackblitz.com/edit/vue-reactive-forms?file=src%2FApp.vue"><iframe>
 
 
 
