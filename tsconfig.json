@@ -10,6 +10,7 @@
       "ES2020",
       "DOM",
     ],
+    "resolveJsonModule": true,
     "outDir": "./dist/",
     "sourceMap": true,
     "declaration": true,

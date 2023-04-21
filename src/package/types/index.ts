@@ -2,9 +2,9 @@ import type { AbstractControl } from "../lib/abstract-conrol";
 
 type UnsubscribeFn = (listener: ListenerFn) => void
 
-export type BooleanValue = { value: boolean };
+export type ReactiveValue<T> = { value: T };
 export type CancelablePromise<T = unknown> = Promise<T> & { cancel: () => void };
-export type FormGroupValue = { [key: string | number]: any };
+export type FormGroupValue = { [key: string]: unknown };
 export type ListenerFn = (value: any) => void;
 export type ValidationErrors = { [key: string]: boolean | string };
 export type ValidationFn<T extends AbstractControl = AbstractControl> = (control: T) => ValidationErrors | null;

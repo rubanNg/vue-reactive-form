@@ -1,0 +1,262 @@
+{
+  "getters": {
+    "value": {
+      "info": {
+        "name": "value",
+        "type": "uknown",
+        "default": "null"
+      },
+      "desciption": "Current value of AbstractControl"
+    },
+    "valid": {
+      "info": {
+        "name": "valid",
+        "type": "boolean",
+        "default": "true"
+      },
+      "desciption": "Indicates if the form is currently in a valid state and the validators do not return an error.<br>If validators was not passed valie is always <code>true</code>"
+    },
+    "invalid": {
+      "info": {
+        "name": "invalid",
+        "type": "boolean",
+        "default": "false"
+      },
+      "desciption": "Reversed value of <code>valid</code> getter"
+    },
+    "errors": {
+      "info": {
+        "name": "errors",
+        "type": "Object",
+        "default": "{}"
+      },
+      "desciption": "Object with all errors of AbstractControl.<br> Example: <code>{ errorName: 'error text' }</code>"
+    },
+    "parent": {
+      "info": {
+        "name": "parent",
+        "type": "FormArray | FormGroup | null",
+        "default": "null"
+      },
+      "desciption": "Parent of AbstractControl.<br>"
+    },
+    "dirty": {
+      "info": {
+        "name": "dirty",
+        "type": "boolean",
+        "default": "false"
+      },
+      "desciption": "Indicates if form value was changed"
+    },
+    "root": {
+      "info": {
+        "name": "root",
+        "type": "AbstractControl",
+        "default": "null"
+      },
+      "desciption": "return top-level AbstractControl.<br>In following code:<code>groupControl</code> is root:<br><code>const groupControl = new FormGroup({<br>&nbsp;&nbsp;login: new FormControl(),<br>&nbsp;&nbsp;password: new FormArray([]),<br>});</code>"
+    },
+    "pending": {
+      "info": {
+        "name": "pending",
+        "type": "boolean",
+        "default": "false"
+      },
+      "desciption": "If any one async validator in progress return <code>true</code> otherwise <code>flase</code>"
+    },
+    "validators": {
+      "info": {
+        "name": "validators",
+        "type": "Array<ValidationFn>",
+        "default": "[]"
+      },
+      "desciption": "Current form validators functions.<br>Must return error <code>ValidationErrors</code> or <code>null</code> if validation is success"
+    },
+    "asyncValidators": {
+      "info": {
+        "name": "asyncValidators",
+        "type": "Array<AsyncValidationFn>",
+        "default": "[]"
+      },
+      "desciption": "Current form validators functions.<br>Function must be async function or function which return promise.<br>Must return error <code>Promise&#8249;ValidationErrors&#8250;</code> or <code>Promise&#8249;null&#8250</code> if validation is success"
+    }
+  },
+  "methods": {
+    "setValidators": {
+      "info": {
+        "name": "setValidators",
+        "arguments": "(validators: ValidationFn[], updateValidity: boolean = false)",
+        "returnType": "void"
+      },
+      "desciption": "Rewriting current validators with new validators. Revalidate form if <code>updateValidity</code> is equal to <code>true</code>"
+    },
+    "addValidators": {
+      "info": {
+        "name": "addValidators",
+        "arguments": "(validators: ValidationFn[], updateValidity: boolean = false)",
+        "returnType": "void"
+      },
+      "desciption": "Add new validators to current validators. Revalidate form if <code>updateValidity</code> is equal to <code>true</code>"
+    },
+    "removeValidators": {
+      "info": {
+        "name": "removeValidators",
+        "arguments": "(validators: ValidationFn[], updateValidity: boolean = false)",
+        "returnType": "void"
+      },
+      "desciption": "Remove validators. Revalidate form if <code>updateValidity</code> is equal to <code>true</code>"
+    },
+    "clearValidators": {
+      "info": {
+        "name": "clearValidators",
+        "arguments": "(updateValidity: boolean = false)",
+        "returnType": "void"
+      },
+      "desciption": "Remove all validators. Revalidate form if <code>updateValidity</code> is equal to <code>true</code>"
+    },
+    "hasValidator": {
+      "info": {
+        "name": "hasValidator",
+        "arguments": "(validatorFn: string | ValidationFn)",
+        "returnType": "boolean"
+      },
+      "desciption": "Return <code>true</code> if validators contains <code>validatorFn</code> otherwise <code>false</code>"
+    },
+    "setAsyncValidators": {
+      "info": {
+        "name": "setAsyncValidators",
+        "arguments": "(asyncValidators: AsyncValidationFn[], updateValidity: boolean = false)",
+        "returnType": "void"
+      },
+      "desciption": "Rewriting current async validators with new validators. Revalidate form if <code>updateValidity</code> is equal to <code>true</code>"
+    },
+    "addAsyncValidators": {
+      "info": {
+        "name": "addAsyncValidators",
+        "arguments": "(asyncValidators: AsyncValidationFn[], updateValidity: boolean = false)",
+        "returnType": "void"
+      },
+      "desciption": "Add new async validators to current validators. Revalidate form if <code>updateValidity</code> is equal to <code>true</code>"
+    },
+    "removeAsyncValidators": {
+      "info": {
+        "name": "removeAsyncValidators",
+        "arguments": "(asyncValidators: AsyncValidationFn[], updateValidity: boolean = false)",
+        "returnType": "void"
+      },
+      "desciption": "Remove async validators. Revalidate form if <code>updateValidity</code> is equal to <code>true</code>"
+    },
+    "clearAsyncValidators": {
+      "info": {
+        "name": "clearAsyncValidators",
+        "arguments": "(updateValidity: boolean = false)",
+        "returnType": "void"
+      },
+      "desciption": "Remove all async validators. Revalidate form if <code>updateValidity</code> is equal to <code>true</code>"
+    },
+    "hasAsyncValidator": {
+      "info": {
+        "name": "hasAsyncValidator",
+        "arguments": "(asyncValidatorFn: string | AsyncValidationFn)",
+        "returnType": "boolean"
+      },
+      "desciption": "Return <code>true</code> if async validators contains <code>asyncValidatorFn</code> otherwise <code>false</code>"
+    },
+    "hasError": {
+      "info": {
+        "name": "hasError",
+        "arguments": "(errorName: string)",
+        "returnType": "boolean"
+      },
+      "desciption": "Return <code>true</code> if errors contains error otherwise <code>false</code>"
+    },
+    "hasErrors": {
+      "info": {
+        "name": "hasErrors",
+        "arguments": "(errorsNames: string[])",
+        "returnType": "boolean"
+      },
+      "desciption": "Return <code>true</code> if errors contains all error otherwise <code>false</code>"
+    },
+    "hasAnyError": {
+      "info": {
+        "name": "hasAnyError",
+        "arguments": "(errorsNames: string[])",
+        "returnType": "boolean"
+      },
+      "desciption": "Return <code>true</code> if errors contains any error otherwise <code>false</code>"
+    },
+    "setErrors": {
+      "info": {
+        "name": "setErrors",
+        "arguments": "(errors: ValidationErrors)",
+        "returnType": "void"
+      },
+      "desciption": "Rewriting current errors with new errors."
+    },
+    "addErrors": {
+      "info": {
+        "name": "addErrors",
+        "arguments": "(errors: ValidationErrors)",
+        "returnType": "void"
+      },
+      "desciption": "Add new errors to current errors."
+    },
+    "getErrors": {
+      "info": {
+        "name": "getErrors",
+        "arguments": "errorsNames: string[]",
+        "returnType": "ValidationErrors"
+      },
+      "desciption": "Get errors by names"
+    },
+    "removeErrors": {
+      "info": {
+        "name": "removeErrors",
+        "arguments": "errorsNames: string[]",
+        "returnType": "ValidationErrors"
+      },
+      "desciption": "Remove errors by names"
+    },
+    "clearErrors": {
+      "info": {
+        "name": "clearErrors",
+        "arguments": "",
+        "returnType": "void"
+      },
+      "desciption": "Remove all errors"
+    },
+    "get": {
+      "info": {
+        "name": "get",
+        "arguments": "(path: string | string[])",
+        "returnType": "AbstractControl | null"
+      },
+      "desciption": "Find and return  nested control by path.<br>Example: <br><code>form.get<FormArray>('child.nested.child')</code><br>or<br><code>form.get<FormControl>('array.1.formGroup.child')</code>"
+    },
+    "setParent": {
+      "info": {
+        "name": "setParent",
+        "arguments": "(parent: AbstractControl)",
+        "returnType": "void"
+      },
+      "desciption": "Set parent control"
+    },
+    "setDirty": {
+      "info": {
+        "name": "setDirty",
+        "arguments": "(value: boolean, updateParentDirty: boolean = false)",
+        "returnType": "void"
+      },
+      "desciption": "Update dirty getter. Update parent dirty if <code>updateParentDirty</code> is equal to <code>true</code>"
+    },
+    "updateValidity": {
+      "info": {
+        "name": "updateValidity",
+        "arguments": "({ updateParentValidity = true, runAsyncValidators = true }: ControlUpdateOptions = {})",
+        "returnType": "void"
+      },
+      "desciption": "Update dirty getter. Update parent dirty if <code>updateParentDirty</code> is equal to <code>true</code>"
+    }
+  }
+}

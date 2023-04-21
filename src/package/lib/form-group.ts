@@ -1,10 +1,10 @@
 import { reactive } from "vue";
-import type { ValidationFn, AsyncValidationFn, FormGroupValue, ControlUpdateOptions } from "../types";
+import type { ValidationFn, AsyncValidationFn, ControlUpdateOptions, ReactiveValue } from "../types";
 import { findFormControl } from "../utils/find-form-control";
 import { AbstractControl } from "./abstract-conrol";
 
 export class FormGroup extends AbstractControl {
-  private _controls: { [key: string]: AbstractControl } = reactive({});
+  private _controls = reactive<ReactiveValue<{ [key: string]: AbstractControl }>>({ value: {} });
 
   constructor(controls: { [ key: string ]: AbstractControl },
     validators: ValidationFn[] = [],
@@ -18,17 +18,17 @@ export class FormGroup extends AbstractControl {
 
   override get valid() {
     const hasNoError = Object.keys(this.errors).length === 0;
-    const allControlsHasValidState = Object.values(this._controls).every((control) => control.valid);
+    const allControlsHasValidState = Object.values(this._controls.value).every((control) => control.valid);
 
     return hasNoError && allControlsHasValidState;
   }
 
   get controls() {
-    return this._controls;
+    return this._controls.value;
   }
 
   get value() {
-    return Object.entries(this._controls).reduce((result: FormGroupValue, [name, control]) => {
+    return Object.entries(this._controls.value).reduce((result: { [key: string]: unknown }, [name, control]) => {
       return {
         ...result,
         [name]: control.value,
@@ -48,7 +48,7 @@ export class FormGroup extends AbstractControl {
   }
 
   setControl(name: string, control: AbstractControl, { updateParentValidity = true, runAsyncValidators = false, updateParentDirty = true }: ControlUpdateOptions = {}) {
-    if(!(name in this._controls)) {
+    if(!(name in this._controls.value)) {
       return;
     }
 
@@ -58,29 +58,29 @@ export class FormGroup extends AbstractControl {
     this.setDirty(true, updateParentDirty);
   }
   
-  setValue(value: { [key: string]: any }, { updateParentValidity = true, runAsyncValidators = true, updateParentDirty = true }: ControlUpdateOptions = {}) {
+  setValue(value: { [key: string]: unknown }, { updateParentValidity = true, runAsyncValidators = true, updateParentDirty = true }: ControlUpdateOptions = {}) {
     Object.entries(value).forEach(([key, value]) => {
-      this._controls[key].setValue(value, { updateParentValidity, runAsyncValidators, updateParentDirty });
+      this._controls.value[key].setValue(value, { updateParentValidity, runAsyncValidators, updateParentDirty });
     });
   }
 
   removeControl(name: string, { updateParentValidity = true, runAsyncValidators = true, updateParentDirty = true }: ControlUpdateOptions = {}) {
-    delete this._controls[name];
+    delete this._controls.value[name];
     this.updateDynamicProperties();
     this.updateValidity({ updateParentValidity, runAsyncValidators });
     this.setDirty(true, updateParentDirty);
   }
 
   at<TResult extends AbstractControl>(name: string): AbstractControl {
-    return this._controls[name] as TResult;
+    return this._controls.value[name] as TResult;
   }
 
   contains(controlName: string) {
-    return controlName in this._controls;
+    return controlName in this._controls.value;
   }
   
   reset() {
-    Object.values(this._controls).forEach((control) => {
+    Object.values(this._controls.value).forEach((control) => {
       control.reset();
     });
     this.clearErrors();
@@ -88,18 +88,21 @@ export class FormGroup extends AbstractControl {
 
   private _setUpControls(controls: { [ key: string ]: AbstractControl }) {
     Object.entries(controls).forEach(([name, control]) => {
-      this._controls[name] = control;
-      this._controls[name].setParent(this);
+      this._controls.value[name] = control;
+      this._controls.value[name].setParent(this);
     });
   }
 
   private updateDynamicProperties() {
-    Object.entries(this._controls).forEach(([name, control]) => {
-      Object.defineProperty(this, name, {
-        get: () => this._controls[name],
+    const properties = Object.keys(this._controls.value).reduce((properties, name) => {
+      properties[name] = {
+        get: () => this._controls.value[name],
         configurable: true,
         enumerable: true,
-      });
-    })
+      }
+      return properties;
+    }, {} as PropertyDescriptorMap)
+
+    Object.defineProperties(this, properties);
   }
 }
