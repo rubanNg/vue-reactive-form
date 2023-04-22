@@ -1,14 +1,18 @@
-import { AbstractControl, FormControl, FormGroup } from '../src';
+import { AbstractControl, FormArray, FormControl, FormGroup } from '../src';
+import { controlErrors } from './helpers';
 
 describe('FormGroup', () => {
-  const initialValue = 'initialValue';
-  const formControl = new FormControl(initialValue);
-  const formGroup = new FormGroup({
-    control: formControl,
-  });
+  const initialValue = 666;
+  const firstControl = new FormControl(initialValue);
+  const secondControl = new FormControl();
+  let formGroup: FormGroup;
 
 
   beforeEach(() => {
+    formGroup = new FormGroup({
+      firstControl: firstControl,
+    });
+
     formGroup.setValidators([]);
     formGroup.setAsyncValidators([]);
     formGroup.clearErrors();
@@ -19,12 +23,12 @@ describe('FormGroup', () => {
   });
 
   it('returns correct value of FormGroup', () => {
-    expect(formGroup.value).toEqual({ control: initialValue });
+    expect(formGroup.value).toEqual({ firstControl: initialValue });
   });
 
   describe('getters', () => {
     it('controls', () => {
-      expect(formGroup.controls).toEqual({ control: formControl });
+      expect(formGroup.controls).toEqual({ firstControl: firstControl });
     });
 
     it('valid', () => {
@@ -32,69 +36,81 @@ describe('FormGroup', () => {
     });
 
     it('valid(returns false)', () => {
-      formGroup.get('control')?.setErrors({ errorName: 'error text' });
+      formGroup.get('firstControl')?.setErrors(controlErrors);
       expect(formGroup.valid).toBe(false);
     });
-  });
 
+    it('value', () => {
+      formGroup.addControl('object', new FormGroup({
+        array: new FormArray([
+          new FormControl('one'),
+          new FormControl('two'),
+          new FormControl('three'),
+        ]),
+        single: new FormControl('singleValue'),
+      }));
+      expect(formGroup.value).toEqual({
+        firstControl: initialValue,
+        object: {
+          array: [
+            'one',
+            'two',
+            'three',
+          ],
+          single: 'singleValue',
+        },
+      });
+    });
+
+  });
 
   describe('methods', () => {
     it('addControl', () => {
-      const formControl2 = new FormControl();
-      formGroup.addControl('control2', formControl2);
+      formGroup.addControl('secondControl', secondControl);
 
       expect(formGroup.controls).toEqual({
-        control: formControl,
-        control2: formControl2,
+        firstControl: firstControl,
+        secondControl: secondControl,
       });
     });
 
     it('setValue', () => {
-      const formControl2 = new FormControl();
-      formGroup.addControl('control2', formControl2);
-      formGroup.setValue({
-        control: 'value1',
-        control2: 'value12',
-      })
+      formGroup.addControl('secondControl', secondControl);
+      const nextValue = {
+        firstControl: 'firstControl',
+        secondControl: 'secondControl',
+      }
+      formGroup.setValue(nextValue)
       
-      expect(formGroup.value).toEqual({
-        control: 'value1',
-        control2: 'value12',
-      });
+      expect(formGroup.value).toEqual(nextValue);
     });
 
     it('removeControl', () => {
-      const formControl2 = new FormControl();
-      formGroup.addControl('control2', formControl2);
-      formGroup.removeControl('control2')
+      formGroup.addControl('secondControl', secondControl);
+      formGroup.removeControl('secondControl')
       
       expect(formGroup.controls).toEqual({
-        control: formControl,
+        firstControl: firstControl,
       });
     });
 
     it('at', () => {
-      const formControl2 = new FormControl();
-      formGroup.addControl('control2', formControl2);
-      formGroup.setValue({ control2: 'value12' })
-      
-      expect(formGroup.at('control2').value).toBe('value12');
+      formGroup.addControl('secondControl', secondControl);
+      formGroup.setValue({ secondControl: 'secondControl' })
+      expect(formGroup.at('secondControl').value).toBe('secondControl');
     });
 
     it('contains', () => {
-      const formControl2 = new FormControl();
-      formGroup.addControl('control2', formControl2);
-      
-      expect(formGroup.contains('control2')).toBe(true);
+      formGroup.addControl('secondControl', secondControl);
+      expect(formGroup.contains('secondControl')).toBe(true);
     });
 
     it('reset', () => {
-      formGroup.get('formControl')?.setValue('new value');
+      formGroup.get('firstControl')?.setValue('firstControl');
       formGroup.reset();
       
       expect(formGroup.value).toEqual({
-        control: initialValue,
-        control2: null,
+        firstControl: initialValue,
       });
     });
   })

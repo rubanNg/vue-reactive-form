@@ -1,7 +1,8 @@
 import { AbstractControl, FormControl } from '../src';
+import { controlErrors } from './helpers';
 
 describe('FormControl', () => {
-  const initialValue = 'initialValue'
+  const initialValue = 666;
   const formControl = new FormControl(initialValue);
 
   it('formControl is instance of AbstractControl', () => {
@@ -14,8 +15,8 @@ describe('FormControl', () => {
 
   describe('methods', () => {
     it('reset', () => {
-      formControl.setValue('11');
-      formControl.setErrors({ errorName: 'error text' });
+      formControl.setValue(777);
+      formControl.setErrors(controlErrors);
       formControl.reset();
 
       expect(formControl.value).toBe(initialValue);

@@ -1,12 +1,12 @@
 import { reactive } from "vue";
 import type { ValidationFn, AsyncValidationFn, ControlUpdateOptions, ReactiveValue } from "../types";
-import { findFormControl } from "../utils/find-form-control";
+import { findFormControl } from "../utils";
 import { AbstractControl } from "./abstract-conrol";
 
 export class FormGroup extends AbstractControl {
-  private _controls = reactive<ReactiveValue<{ [key: string]: AbstractControl }>>({ value: {} });
+  private _controls = reactive<ReactiveValue<{ [key: string | number]: AbstractControl }>>({ value: {} });
 
-  constructor(controls: { [ key: string ]: AbstractControl },
+  constructor(controls: { [key: string | number]: AbstractControl },
     validators: ValidationFn[] = [],
     asyncValidators: AsyncValidationFn[] = [],
   ) {
@@ -28,12 +28,12 @@ export class FormGroup extends AbstractControl {
   }
 
   get value() {
-    return Object.entries(this._controls.value).reduce((result: { [key: string]: unknown }, [name, control]) => {
+    return Object.entries(this._controls.value).reduce((result, [name, control]) => {
       return {
         ...result,
         [name]: control.value,
       };
-    }, {});
+    }, {} as { [key: string | number]: unknown });
   }
 
   addControl(name: string, control: AbstractControl, { updateParentValidity = true, runAsyncValidators = false, updateParentDirty = true }: ControlUpdateOptions = {}) {
@@ -58,7 +58,7 @@ export class FormGroup extends AbstractControl {
     this.setDirty(true, updateParentDirty);
   }
   
-  setValue(value: { [key: string]: unknown }, { updateParentValidity = true, runAsyncValidators = true, updateParentDirty = true }: ControlUpdateOptions = {}) {
+  setValue(value: { [key: string | number]: unknown }, { updateParentValidity = true, runAsyncValidators = true, updateParentDirty = true }: ControlUpdateOptions = {}) {
     Object.entries(value).forEach(([key, value]) => {
       this._controls.value[key].setValue(value, { updateParentValidity, runAsyncValidators, updateParentDirty });
     });

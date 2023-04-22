@@ -1,6 +1,6 @@
 import { reactive } from "vue";
 import type { ValidationFn, AsyncValidationFn, ControlUpdateOptions, ReactiveValue } from "../types";
-import { findFormControl } from "../utils/find-form-control";
+import { findFormControl } from "../utils";
 import { AbstractControl } from "./abstract-conrol";
 
 

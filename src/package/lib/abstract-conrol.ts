@@ -1,6 +1,6 @@
 import { reactive } from "vue";
 import type { ValidationErrors, ValidationFn, AsyncValidationFn, CancelablePromise, ControlUpdateOptions, ReactiveValue } from "../types";
-import { getUniqueAsyncValidators, getUniqueValidators } from "../utils/get-unique-validators";
+import { getUniqueAsyncValidators, getUniqueValidators } from "../utils";
 import type { FormArray } from "./form-array";
 import type { FormGroup } from "./form-group";
 
@@ -24,10 +24,6 @@ export abstract class AbstractControl {
   
   get asyncValidators() {
     return this._asyncValidators.value;
-  }
-
-  get valid() {
-    return Object.keys(this._errors.value).length === 0;
   }
 
   get invalid() {
@@ -243,6 +239,7 @@ export abstract class AbstractControl {
   }
 
   abstract get value(): unknown;
+  abstract get valid(): boolean;
   abstract setValue(value: unknown, options?: ControlUpdateOptions): void;
   abstract reset(): void;
 }

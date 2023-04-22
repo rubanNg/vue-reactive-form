@@ -1,118 +1,126 @@
-import { AbstractControl, FormArray, FormControl, FormGroup } from '../src';
-import { asyncValidatorWithoutError, syncValidatorWithError, syncValidatorWithoutError } from './helpers';
+import { FormControl, FormGroup } from '../src';
+import {
+  asyncValidatorWithoutError,
+  syncValidatorWithError,
+  syncValidatorWithoutError,
+  controlErrors,
+} from './helpers';
 
 describe('AbstractControl', () => {
-  const abstractControl = new FormControl(null);
+  const control = new FormControl();
 
   beforeEach(() => {
-    abstractControl.setValidators([]);
-    abstractControl.setAsyncValidators([]);
-    abstractControl.clearErrors();
+    control.setValidators([]);
+    control.setAsyncValidators([]);
+    control.clearErrors();
   });
 
   describe('getters', () => {
     it('validators', () => {
-      abstractControl.addValidators([syncValidatorWithoutError]);
-      expect(abstractControl.validators).toEqual([syncValidatorWithoutError]);
+      control.addValidators([syncValidatorWithoutError]);
+      expect(control.validators).toEqual([syncValidatorWithoutError]);
     });
 
     it('asyncValidators', () => {
-      abstractControl.addAsyncValidators([asyncValidatorWithoutError]);
-      expect(abstractControl.asyncValidators).toEqual([asyncValidatorWithoutError]);
+      control.addAsyncValidators([asyncValidatorWithoutError]);
+      expect(control.asyncValidators).toEqual([asyncValidatorWithoutError]);
     });
 
     it('valid(when control has errors)', () => {
-      abstractControl.setErrors({ error: 'text error' })
-      expect(abstractControl.valid).toBe(false);
+      control.setErrors(controlErrors)
+      expect(control.valid).toBe(false);
     });
 
     it('valid (when control has no errors)', () => {
-      abstractControl.setErrors({ error: 'text error' });
-      abstractControl.clearErrors();
-      expect(abstractControl.valid).toBe(true);
+      control.setErrors(controlErrors);
+      control.clearErrors();
+      expect(control.valid).toBe(true);
     });
 
     it('errors(when control has errors)', () => {
-      abstractControl.setErrors({ error: 'text error' });
-      expect(abstractControl.errors).toEqual({ error: 'text error' });
+      control.setErrors(controlErrors);
+      expect(control.errors).toEqual(controlErrors);
     });
 
     it('errors(when control has no errors)', () => {
-      abstractControl.setErrors({ error: 'text error' });
-      abstractControl.clearErrors();
-      expect(abstractControl.errors).toEqual({});
+      control.setErrors(controlErrors);
+      control.clearErrors();
+      expect(control.errors).toEqual({});
     });
 
     it('dirty', () => {
-      expect(abstractControl.dirty).toBe(false);
+      expect(control.dirty).toBe(false);
     });
 
     it('dirty(after update control value)', () => {
-      abstractControl.setValue(1);
-      expect(abstractControl.dirty).toBe(true);``
+      control.setValue({ key: 'value' });
+      expect(control.dirty).toBe(true);``
     });
   });
 
   describe('methods', () => {
     it('hasError', () => {
-      abstractControl.setErrors({ errorName: 'error text' });
-      expect(abstractControl.hasError('errorName')).toBe(true);
+      control.setErrors(controlErrors);
+      expect(control.hasError('errorName')).toBe(true);
     });
 
     it('hasErrors', () => {
-      abstractControl.setErrors({ errorName: 'error text', errorName2: 'error text' });
-      expect(abstractControl.hasErrors(['errorName', 'errorName2'])).toBe(true);
+      control.setErrors(controlErrors);
+      expect(control.hasErrors(Object.keys(controlErrors))).toBe(true);
     });
 
     it('hasAnyError', () => {
-      abstractControl.setErrors({ errorName: 'error text', errorName2: 'error text' });
-      expect(abstractControl.hasAnyError(['errorName', 'errorName2'])).toBe(true);
+      control.setErrors(controlErrors);
+      expect(control.hasAnyError(Object.keys(controlErrors))).toBe(true);
     });
 
     it('setErrors', () => {
-      abstractControl.setErrors({ errorName: 'error text', errorName2: 'error text' });
-      expect(abstractControl.errors).toEqual({ errorName: 'error text', errorName2: 'error text' });
+      control.setErrors(controlErrors);
+      expect(control.errors).toEqual(controlErrors);
     });
 
     it('addErrors', () => {
-      abstractControl.setErrors({ errorName: 'error text', errorName2: 'error text' });
-      abstractControl.addErrors({ errorName3: 'error text' });
-      expect(abstractControl.errors).toEqual({ errorName: 'error text', errorName2: 'error text',  errorName3: 'error text' });
+      control.setErrors(controlErrors);
+      control.addErrors({ errorName3: 'error text' });
+      expect(control.errors).toEqual({
+        ...controlErrors,
+        errorName3: 'error text'
+      });
     });
 
     it('getErrors', () => {
-      abstractControl.setErrors({ errorName: 'error text', errorName2: 'error text' });
-      expect(abstractControl.getErrors(['errorName'])).toEqual({ errorName: 'error text' });
+      control.setErrors(controlErrors);
+      expect(control.getErrors(['errorName'])).toEqual({ 'errorName': controlErrors.errorName });
     });
 
     it('removeErrors', () => {
-      abstractControl.setErrors({ errorName: 'error text', errorName2: 'error text' });
-      abstractControl.removeErrors(['errorName2']);
-      expect(abstractControl.errors).toEqual({ errorName: 'error text' });
+      control.setErrors({ errorName: 'error text', errorName2: 'error text' });
+      control.removeErrors(['errorName2']);
+      expect(control.errors).toEqual({ errorName: 'error text' });
     });
 
     it('clearErrors', () => {
-      abstractControl.setErrors({ errorName: 'error text', errorName2: 'error text' });
-      abstractControl.clearErrors();
-      expect(abstractControl.errors).toEqual({});
+      control.setErrors(controlErrors);
+      control.clearErrors();
+      expect(control.errors).toEqual({});
     });
 
     it('setParent', () => {
       const parent = new FormGroup({});
-      abstractControl.setParent(parent);
-      expect(abstractControl.parent).toEqual(parent);
+      control.setParent(parent);
+      expect(control.parent).toEqual(parent);
     });
 
     it('setDirty', () => {
-      abstractControl.setDirty(true);
-      expect(abstractControl.dirty).toBe(true);
+      control.setDirty(true);
+      expect(control.dirty).toBe(true);
     });
 
     it('updateValidity', () => {
-      abstractControl.addValidators([syncValidatorWithError]);
-      abstractControl.updateValidity();
-      expect(abstractControl.valid).toBe(false);
-      expect(abstractControl.errors).toEqual(syncValidatorWithError(abstractControl));
+      control.addValidators([syncValidatorWithError]);
+      control.updateValidity();
+      expect(control.valid).toBe(false);
+      expect(control.errors).toEqual(syncValidatorWithError(control));
     });
   });
 });

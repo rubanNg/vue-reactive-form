@@ -6,10 +6,15 @@ export const syncValidatorWithoutError: ValidationFn = (conrtol: AbstractControl
 }
 
 export const syncValidatorWithError: ValidationFn = (conrtol: AbstractControl) => {
-  return { errorName: 'error text' };
+  return controlErrors;
 }
 
 export const asyncValidatorWithoutError: AsyncValidationFn = (conrtol: AbstractControl) => {
   return new Promise((resolve) => resolve(null));
+}
+
+export const controlErrors = {
+  error: 'text error',
+  errorName: 'ivalid name',
 }
 
