@@ -6,8 +6,10 @@ module.exports = {
   output: {
     filename: "index.js",
     path: path.resolve(__dirname, 'dist'),
-    libraryTarget: "umd",
-    clean: true
+    clean: true,
+    library: {
+      type: 'commonjs'
+    }
   },
   resolve: {
     extensions: ['.ts', '.tsx']
