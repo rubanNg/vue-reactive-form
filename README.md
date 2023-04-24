@@ -16,7 +16,11 @@ const control = new FormControl(initialValue);
 
 function checkTodoStatus<FormGroup>(control) {
   const todos = control.get<FormArray>('todos');
-  return todos.value.every(todo => todo.status === true) ? null : { 'errorStatus': 'all must be completed' }
+  if (todos.controls.every(control => control instanceof FormGroup)) {
+    return todos.value.every(value => value.status === true) ? null : { 'errorStatus': 'all must be completed' }
+  }
+
+  return null;
 }
 
 const formGroup = new FormGroup({
@@ -25,7 +29,7 @@ const formGroup = new FormGroup({
   tosos: new FormArray([]),
 }, [checkTodoStatus]);
 
-// add new todo wirh status
+// add new todo with status
 
 formGroup.todos.addControl(new FormGroup({
   status: new FormControl(false),
@@ -34,9 +38,35 @@ formGroup.todos.addControl(new FormGroup({
 
 // or simple todo with only name
 
-formGroup.todos.addControl(new FormControl('todo name'),
+formGroup.todos.addControl(new FormControl('todo name')),
+
+// or both
+
+formGroup.todos.addControls([
+  new FormGroup({
+    status: new FormControl(false),
+    name: new FormControl(''),
+  }),
+  new FormControl('todo name')
+]);
 ```
 
+## render FormArray
+```html
+  <div class="d-flex">
+    <div>{{ formGroup.name.value }}<div>
+    <div>{{ formGroup.age.value }}<div>
+  </div>
+  <template v-for="control in formGroup.todos.controls">
+    <template v-if="control instanceof FormControl">
+      <textarea v-model="control.value"></textarea>
+    </template>
+    <template v-if="control instanceof FormGroup">
+      <input type="checkbox" v-model="control.status.value" />
+      <textarea v-model="control.name.value"></textarea>
+    </template>
+  </template>
+```
 
 ## Validation
 

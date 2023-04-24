@@ -9,6 +9,11 @@ describe('FormArray', () => {
 
   const getLastIndex = () => formArray.controls.length - 1;
 
+  const controlsArrays = [
+    new FormControl(0),
+    new FormControl(1),
+    new FormControl(2),
+  ];
 
   beforeEach(() => {
     formArray = new FormArray([
@@ -50,6 +55,15 @@ describe('FormArray', () => {
         firstControl,
         secondControl
       ]);
+    });
+
+    it('addControls', () => {
+      formArray.addControls(controlsArrays);
+      expect(formArray.at(1).value).toBe(controlsArrays.at(0)?.value);
+      formArray.removeAt(0);
+      expect(formArray.at(0).value).toBe(controlsArrays.at(0)?.value);
+      formArray.removeAt(-1);
+      expect(formArray.at(-1).value).toBe(controlsArrays.at(-2)?.value);
     });
 
     it('setValue', () => {

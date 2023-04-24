@@ -44,6 +44,16 @@ export class FormArray extends AbstractControl {
     this.setDirty(true, updateParentDirty);
   }
 
+  addControls(controls: AbstractControl[], { updateParentValidity = true, runAsyncValidators = false, updateParentDirty = true }: ControlUpdateOptions = {}) {
+    controls.forEach((control) => {
+      control.setParent(this as AbstractControl);
+      this._controls.value.push(control);
+    });
+    this.updateDynamicProperties();
+    this.updateValidity({ updateParentValidity, runAsyncValidators });
+    this.setDirty(true, updateParentDirty);
+  }
+
   setControl(index: number, control: AbstractControl, { updateParentValidity = true, runAsyncValidators = false, updateParentDirty = true }: ControlUpdateOptions = {}) {
     if(!this.at(index)) {
       return;
@@ -63,7 +73,15 @@ export class FormArray extends AbstractControl {
   }
 
   at<TResult extends AbstractControl>(index: number): AbstractControl {
-    return this._controls.value[index] as TResult;
+    return this._controls.value.at(index) as TResult;
+  }
+
+  first<TResult extends AbstractControl>(): AbstractControl {
+    return this._controls.value.at(0) as TResult;
+  }
+
+  last<TResult extends AbstractControl>(): AbstractControl {
+    return this._controls.value.at(-1) as TResult;
   }
 
   contains(index: number) {
