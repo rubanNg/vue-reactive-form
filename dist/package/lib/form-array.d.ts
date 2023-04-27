@@ -13,7 +13,7 @@ export declare class FormArray extends AbstractControl {
     setValue(values: unknown[], { updateParentValidity, runAsyncValidators, updateParentDirty }?: ControlUpdateOptions): void;
     at<TResult extends AbstractControl>(index: number): AbstractControl;
     firstChild<TResult extends AbstractControl>(): AbstractControl;
-    lastLast<TResult extends AbstractControl>(): AbstractControl;
+    lastChild<TResult extends AbstractControl>(): AbstractControl;
     contains(index: number): boolean;
     removeAt(index: number, { updateParentValidity, runAsyncValidators, updateParentDirty }?: ControlUpdateOptions): void;
     reset(): void;

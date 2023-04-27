@@ -3,7 +3,7 @@ import type { AbstractControl } from "../lib/abstract-conrol";
 
 type UnsubscribeFn = (listener: ListenerFn) => void
 
-export type ReactiveValue<T> = { value: UnwrapRef<T> };
+export type ReactiveValue<T> = { value: T };
 export type CancelablePromise<T = unknown> = Promise<T> & { cancel: () => void };
 export type FormGroupValue = { [key: string]: unknown };
 export type ListenerFn = (value: any) => void;
