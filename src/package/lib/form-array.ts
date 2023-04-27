@@ -80,7 +80,7 @@ export class FormArray extends AbstractControl {
     return this._controls.value.at(0) as TResult;
   }
 
-  lastLast<TResult extends AbstractControl>(): AbstractControl {
+  lastChild<TResult extends AbstractControl>(): AbstractControl {
     return this._controls.value.at(-1) as TResult;
   }
 
