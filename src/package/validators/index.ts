@@ -12,13 +12,13 @@ export class Validators {
 
   static max(value: number) {
     return function (control: AbstractControl): ValidationErrors {
-      return control.value > value ? { max: `value must be less than or equal to ${value}` } : null;
+      return Number(control.value) > value ? { max: `value must be less than or equal to ${value}` } : null;
     }
   }
 
   static min(value: number) {
     return function (control: AbstractControl): ValidationErrors {
-      return control.value >= value ? null : { min: `value must be greater than or equal to ${value}` };
+      return Number(control.value) >= value ? null : { min: `value must be greater than or equal to ${value}` };
     }
   }
 

@@ -1,14 +1,14 @@
 import type { ValidationFn, AsyncValidationFn, ValueSubscribtion, ControlUpdateOptions } from "../types";
 import { AbstractControl } from "./abstract-conrol";
-export declare class FormControl<T = any> extends AbstractControl {
-    private _value;
-    private _listiners;
-    private _initialValue;
-    constructor(value?: T, validators?: ValidationFn[], asyncValidators?: AsyncValidationFn[]);
-    get value(): T;
+export declare class FormControl<TValue = any> extends AbstractControl {
+    #private;
+    constructor(value?: TValue, validators?: ValidationFn[], asyncValidators?: AsyncValidationFn[]);
+    get<TResult extends AbstractControl>(path: string | string[]): TResult | null;
+    get value(): TValue;
     private set value(value);
     get valid(): boolean;
-    get valueChange(): ValueSubscribtion;
+    get invalid(): boolean;
+    get valueChanged(): ValueSubscribtion;
     reset(): void;
-    setValue(value: T, { updateParentValidity, runAsyncValidators, updateParentDirty }?: ControlUpdateOptions): void;
+    setValue(value: TValue, { updateParentValidity, runAsyncValidators, updateParentDirty }?: ControlUpdateOptions): void;
 }

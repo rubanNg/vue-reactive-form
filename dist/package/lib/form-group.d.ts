@@ -1,29 +1,28 @@
-import type { ValidationFn, AsyncValidationFn, ControlUpdateOptions } from "../types";
+import type { ValidationFn, AsyncValidationFn, ControlUpdateOptions, ObjectKey } from "../types";
 import { AbstractControl } from "./abstract-conrol";
-export declare class FormGroup extends AbstractControl {
-    private _controls;
-    constructor(controls: {
-        [key: string | number]: AbstractControl;
-    }, validators?: ValidationFn[], asyncValidators?: AsyncValidationFn[]);
+export declare class FormGroup<FormGroupControls extends {
+    [K in keyof FormGroupControls]: AbstractControl;
+} = any> extends AbstractControl {
+    #private;
+    constructor(controls: FormGroupControls, validators?: ValidationFn[], asyncValidators?: AsyncValidationFn[]);
     get valid(): boolean;
-    get controls(): {
-        [key: string]: AbstractControl;
-        [key: number]: AbstractControl;
-    };
-    get value(): {
-        [key: string]: unknown;
-        [key: number]: unknown;
-    };
-    addControl(name: string, control: AbstractControl, { updateParentValidity, runAsyncValidators, updateParentDirty }?: ControlUpdateOptions): void;
+    get invalid(): boolean;
+    get controls(): FormGroupControls;
+    get value(): { [K in keyof FormGroupControls]: unknown; };
     get<TResult extends AbstractControl>(path: string | string[]): TResult | null;
-    setControl(name: string, control: AbstractControl, { updateParentValidity, runAsyncValidators, updateParentDirty }?: ControlUpdateOptions): void;
+    addControl(name: ObjectKey, control: AbstractControl, { updateParentValidity, runAsyncValidators, updateParentDirty }?: ControlUpdateOptions): void;
+    addControls(controls: {
+        [key: ObjectKey]: AbstractControl;
+    }, { updateParentValidity, runAsyncValidators, updateParentDirty }?: ControlUpdateOptions): void;
+    setControl(name: ObjectKey, control: AbstractControl, { updateParentValidity, runAsyncValidators, updateParentDirty }?: ControlUpdateOptions): void;
+    setControls(controls: {
+        [key: ObjectKey]: AbstractControl;
+    }, { updateParentValidity, runAsyncValidators, updateParentDirty }?: ControlUpdateOptions): void;
     setValue(value: {
-        [key: string | number]: unknown;
+        [key: ObjectKey]: unknown;
     }, { updateParentValidity, runAsyncValidators, updateParentDirty }?: ControlUpdateOptions): void;
     removeControl(name: string, { updateParentValidity, runAsyncValidators, updateParentDirty }?: ControlUpdateOptions): void;
-    at<TResult extends AbstractControl>(name: string): AbstractControl;
-    contains(controlName: string): boolean;
+    at<TResult extends AbstractControl>(name: ObjectKey): AbstractControl;
+    contains(controlName: ObjectKey): boolean;
     reset(): void;
-    private _setUpControls;
-    private updateDynamicProperties;
 }

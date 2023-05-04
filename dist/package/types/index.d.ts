@@ -11,7 +11,7 @@ export type FormGroupValue = {
 };
 export type ListenerFn = (value: any) => void;
 export type ValidationErrors = {
-    [key: string]: boolean | string;
+    [key: string]: string;
 };
 export type ValidationFn<T extends AbstractControl = AbstractControl> = (control: T) => ValidationErrors | null;
 export type AsyncValidationFn<T extends AbstractControl = AbstractControl> = (control: T, abortController?: AbortController) => Promise<ValidationErrors | null>;
@@ -24,4 +24,5 @@ export type ControlUpdateOptions = {
     runAsyncValidators?: boolean;
     updateParentDirty?: boolean;
 };
+export type ObjectKey = string | number;
 export {};

@@ -2,39 +2,45 @@ import { reactive } from "vue";
 import type { ListenerFn, ValidationFn, AsyncValidationFn, ValueSubscribtion, ControlUpdateOptions, ReactiveValue } from "../types";
 import { AbstractControl } from "./abstract-conrol";
 
-export class FormControl<T = any> extends AbstractControl {
-  private _value = reactive<ReactiveValue<unknown>>({ value: undefined });
-  private _listiners: ListenerFn[] = [];
-  private _initialValue: unknown = undefined;
+export class FormControl<TValue = any> extends AbstractControl {
+  #currentValue: ReactiveValue<TValue> = reactive({ value: undefined });
+  #listiners: ListenerFn[] = [];
   
 
-  constructor(value: T = undefined, validators: ValidationFn[] = [], asyncValidators: AsyncValidationFn[] = []) {
+  constructor(value: TValue = undefined, validators?: ValidationFn[], asyncValidators?: AsyncValidationFn[]) {
     super(validators, asyncValidators);
-    this._value.value = value;
-    this._initialValue = value;
+    this.#currentValue.value = value;
     this.updateValidity({ updateParentValidity: false, runAsyncValidators: false });
   }
 
-  get value(): T {
-    return this._value.value as T;
+  get<TResult extends AbstractControl>(path: string | string[]): TResult | null {
+    return null;
   }
 
-  private set value(value: T) {
+  get value(): TValue {
+    return this.#currentValue.value;
+  }
+
+  private set value(value: TValue) {
     this.setValue(value);
   }
 
-  get valid() {
+  get valid(): boolean {
     return Object.keys(this.errors).length === 0;
   }
 
-  get valueChange(): ValueSubscribtion {
+  get invalid(): boolean {
+    return this.valid === false;
+  }
+
+  get valueChanged(): ValueSubscribtion {
     const unsubscribeFn = (listener: ListenerFn) => {
-      this._listiners = this._listiners.filter(fn => fn !== listener);
+      this.#listiners = this.#listiners.filter(fn => fn !== listener);
     }
 
     return {
       subscribe: (listener: ListenerFn) => {
-        this._listiners.push(listener);
+        this.#listiners.push(listener);
         return () => {
           unsubscribeFn(listener);
         };
@@ -43,15 +49,14 @@ export class FormControl<T = any> extends AbstractControl {
     }
   };
 
-  reset() {
-    this._value.value = this._initialValue;
+  reset(): void {
     this.setDirty(false);
     this.clearErrors();
   };
 
-  setValue(value: T, { updateParentValidity = true, runAsyncValidators = true, updateParentDirty = true }: ControlUpdateOptions = {}) {
-    this._value.value = value;
-    this._listiners.forEach(listener => listener(this._value.value))
+  setValue(value: TValue, { updateParentValidity = true, runAsyncValidators = true, updateParentDirty = true }: ControlUpdateOptions = {}): void {
+    this.#currentValue.value = value;
+    this.#listiners.forEach(listener => listener(this.#currentValue.value))
     this.updateValidity({ updateParentValidity, runAsyncValidators });
     this.setDirty(true, updateParentDirty);
   }

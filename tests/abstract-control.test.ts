@@ -7,9 +7,10 @@ import {
 } from './helpers';
 
 describe('AbstractControl', () => {
-  const control = new FormControl();
+  let control: FormControl;
 
   beforeEach(() => {
+    control = new FormControl('');
     control.setValidators([]);
     control.setAsyncValidators([]);
     control.clearErrors();
@@ -53,8 +54,8 @@ describe('AbstractControl', () => {
     });
 
     it('dirty(after update control value)', () => {
-      control.setValue({ key: 'value' });
-      expect(control.dirty).toBe(true);``
+      control.setValue('value');
+      expect(control.dirty).toBe(true);
     });
   });
 
