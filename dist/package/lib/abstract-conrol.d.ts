@@ -2,7 +2,13 @@ import type { ValidationErrors, ValidationFn, AsyncValidationFn, ControlUpdateOp
 import type { FormArray } from "./form-array";
 import type { FormGroup } from "./form-group";
 export declare abstract class AbstractControl {
-    #private;
+    private readonly _errors;
+    private readonly _parent;
+    private readonly _validators;
+    private readonly _asyncValidators;
+    private readonly _dirty;
+    private readonly _hasOwnPendingAsyncValidator;
+    private _existingCancelableAsyncValidators;
     constructor(validators?: ValidationFn[], asyncValidators?: AsyncValidationFn[]);
     get validators(): ValidationFn[];
     get asyncValidators(): AsyncValidationFn[];
@@ -32,6 +38,9 @@ export declare abstract class AbstractControl {
     setParent(parent: FormGroup | FormArray | null): void;
     setDirty(value: boolean, updateParentDirty?: boolean): void;
     updateValidity({ updateParentValidity, runAsyncValidators }?: ControlUpdateOptions): void;
+    private _runAsyncValidators;
+    private _makeCancelableAsyncValidator;
+    private _cancelExistingAsyncValidator;
     abstract get<TResult extends AbstractControl>(path: string | string[]): TResult | null;
     abstract get value(): unknown;
     abstract get valid(): boolean;

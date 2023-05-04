@@ -1,7 +1,7 @@
 import type { ValidationFn, AsyncValidationFn, ControlUpdateOptions } from "../types";
 import { AbstractControl } from "./abstract-conrol";
 export declare class FormArray extends AbstractControl {
-    #private;
+    private readonly _controls;
     constructor(controls: AbstractControl[], validators?: ValidationFn[], asyncValidators?: AsyncValidationFn[]);
     get controls(): AbstractControl[];
     get value(): any[];
@@ -22,4 +22,8 @@ export declare class FormArray extends AbstractControl {
     removeAt(index: number, { updateParentValidity, runAsyncValidators, updateParentDirty }?: ControlUpdateOptions): void;
     reset(): void;
     updateAt(index: number, value: unknown, { updateParentValidity, runAsyncValidators, updateParentDirty }?: ControlUpdateOptions): void;
+    private _updateDynamicProperties;
+    private _updateCurrentControls;
+    private _insertControlByIndex;
+    private _removeControlByIndex;
 }

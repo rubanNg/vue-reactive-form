@@ -3,13 +3,13 @@ import type { ListenerFn, ValidationFn, AsyncValidationFn, ValueSubscribtion, Co
 import { AbstractControl } from "./abstract-conrol";
 
 export class FormControl<TValue = any> extends AbstractControl {
-  #currentValue: ReactiveValue<TValue> = reactive({ value: undefined });
-  #listiners: ListenerFn[] = [];
+  private readonly _value: ReactiveValue<TValue> = reactive({ value: undefined });
+  private _listiners: ListenerFn[] = [];
   
 
   constructor(value: TValue = undefined, validators?: ValidationFn[], asyncValidators?: AsyncValidationFn[]) {
     super(validators, asyncValidators);
-    this.#currentValue.value = value;
+    this._value.value = value;
     this.updateValidity({ updateParentValidity: false, runAsyncValidators: false });
   }
 
@@ -18,7 +18,7 @@ export class FormControl<TValue = any> extends AbstractControl {
   }
 
   get value(): TValue {
-    return this.#currentValue.value;
+    return this._value.value;
   }
 
   private set value(value: TValue) {
@@ -35,12 +35,12 @@ export class FormControl<TValue = any> extends AbstractControl {
 
   get valueChanged(): ValueSubscribtion {
     const unsubscribeFn = (listener: ListenerFn) => {
-      this.#listiners = this.#listiners.filter(fn => fn !== listener);
+      this._listiners = this._listiners.filter(fn => fn !== listener);
     }
 
     return {
       subscribe: (listener: ListenerFn) => {
-        this.#listiners.push(listener);
+        this._listiners.push(listener);
         return () => {
           unsubscribeFn(listener);
         };
@@ -50,13 +50,15 @@ export class FormControl<TValue = any> extends AbstractControl {
   };
 
   reset(): void {
+    this._value.value = undefined;
+    this._listiners.forEach(listener => listener(this._value.value))
     this.setDirty(false);
     this.clearErrors();
   };
 
   setValue(value: TValue, { updateParentValidity = true, runAsyncValidators = true, updateParentDirty = true }: ControlUpdateOptions = {}): void {
-    this.#currentValue.value = value;
-    this.#listiners.forEach(listener => listener(this.#currentValue.value))
+    this._value.value = value;
+    this._listiners.forEach(listener => listener(this._value.value))
     this.updateValidity({ updateParentValidity, runAsyncValidators });
     this.setDirty(true, updateParentDirty);
   }

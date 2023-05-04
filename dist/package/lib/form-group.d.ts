@@ -3,7 +3,7 @@ import { AbstractControl } from "./abstract-conrol";
 export declare class FormGroup<FormGroupControls extends {
     [K in keyof FormGroupControls]: AbstractControl;
 } = any> extends AbstractControl {
-    #private;
+    private readonly _controls;
     constructor(controls: FormGroupControls, validators?: ValidationFn[], asyncValidators?: AsyncValidationFn[]);
     get valid(): boolean;
     get invalid(): boolean;
@@ -25,4 +25,8 @@ export declare class FormGroup<FormGroupControls extends {
     at<TResult extends AbstractControl>(name: ObjectKey): AbstractControl;
     contains(controlName: ObjectKey): boolean;
     reset(): void;
+    private _setUpControls;
+    private _updateDynamicProperties;
+    private _updateCurrentControls;
+    private _isExistsControl;
 }

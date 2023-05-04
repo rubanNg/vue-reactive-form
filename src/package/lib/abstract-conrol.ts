@@ -5,37 +5,37 @@ import type { FormArray } from "./form-array";
 import type { FormGroup } from "./form-group";
 
 export abstract class AbstractControl { 
-  #errors: ReactiveValue<ValidationErrors> = reactive({ value: {} });
-  #parent: ReactiveValue<AbstractControl> = reactive({ value: null });
-  #validators: ReactiveValue<ValidationFn[]> = reactive({ value: [] });
-  #asyncValidators: ReactiveValue<AsyncValidationFn[]> = reactive({ value: [] });
-  #dirty: ReactiveValue<boolean> = reactive({ value: false });
-  #hasOwnPendingAsyncValidator: ReactiveValue<boolean> = reactive({ value: false });
-  #existingCancelableAsyncValidators: CancelablePromise<ValidationErrors>[] = [];
+  private readonly _errors: ReactiveValue<ValidationErrors> = reactive({ value: {} });
+  private readonly _parent: ReactiveValue<AbstractControl> = reactive({ value: null });
+  private readonly _validators: ReactiveValue<ValidationFn[]> = reactive({ value: [] });
+  private readonly _asyncValidators: ReactiveValue<AsyncValidationFn[]> = reactive({ value: [] });
+  private readonly _dirty: ReactiveValue<boolean> = reactive({ value: false });
+  private readonly _hasOwnPendingAsyncValidator: ReactiveValue<boolean> = reactive({ value: false });
+  private _existingCancelableAsyncValidators: CancelablePromise<ValidationErrors>[] = [];
   
   constructor(validators: ValidationFn[] = [], asyncValidators: AsyncValidationFn[] = []) {
-    this.#validators.value = validators;
-    this.#asyncValidators.value = asyncValidators;
+    this._validators.value = validators;
+    this._asyncValidators.value = asyncValidators;
   }
 
   get validators(): ValidationFn[] {
-    return this.#validators.value;
+    return this._validators.value;
   }
   
   get asyncValidators(): AsyncValidationFn[] {
-    return this.#asyncValidators.value;
+    return this._asyncValidators.value;
   }
 
   get errors(): ValidationErrors {
-    return this.#errors.value;
+    return this._errors.value;
   }
 
   get parent(): FormGroup | FormArray {
-    return this.#parent.value as (FormGroup | FormArray);
+    return this._parent.value as (FormGroup | FormArray);
   }
 
   get dirty(): boolean {
-    return this.#dirty.value; 
+    return this._dirty.value; 
   }
 
   get root(): AbstractControl {
@@ -47,41 +47,41 @@ export abstract class AbstractControl {
   }
 
   get pending(): boolean {
-    return this.#hasOwnPendingAsyncValidator.value;
+    return this._hasOwnPendingAsyncValidator.value;
   }
 
   setValidators(validators: ValidationFn[], updateValidity: boolean = false): void {
-    this.#validators.value = validators;
+    this._validators.value = validators;
     updateValidity && this.updateValidity({ updateParentValidity: updateValidity, runAsyncValidators: false });
   }
 
   addValidators(validators: ValidationFn[], updateValidity: boolean = false): void {
     const unique = getUniqueValidators(this, validators);
-    this.#validators.value.push(...unique);
+    this._validators.value.push(...unique);
     updateValidity && this.updateValidity({ updateParentValidity: updateValidity, runAsyncValidators: false });
   }
 
   removeValidators(validators: ValidationFn[], updateValidity: boolean = false): void {
-    this.#validators.value = this.#validators.value.filter(validator => {
+    this._validators.value = this._validators.value.filter(validator => {
       return validators.some(s => s === validator || s.name === validator.name) ? false : true;
     });
     updateValidity && this.updateValidity({ updateParentValidity: updateValidity, runAsyncValidators: false });
   }
   
   clearValidators(updateValidity: boolean = false): void {
-    this.#validators.value = [];
+    this._validators.value = [];
     updateValidity && this.updateValidity({ updateParentValidity: updateValidity, runAsyncValidators: false });
   }
 
   hasValidator(validatorFn: string | ValidationFn): boolean {
     if (typeof validatorFn === 'string') {
-      return this.#validators.value.some(validator => validator.name == validatorFn);
+      return this._validators.value.some(validator => validator.name == validatorFn);
     }
-    return this.#validators.value.includes(validatorFn as ValidationFn);
+    return this._validators.value.includes(validatorFn as ValidationFn);
   }
 
   setAsyncValidators(asyncValidators: AsyncValidationFn[], updateValidity: boolean = false): void {
-    this.#asyncValidators.value = asyncValidators;
+    this._asyncValidators.value = asyncValidators;
     updateValidity && this.updateValidity({ updateParentValidity: updateValidity, runAsyncValidators: false });
   }
 
@@ -92,14 +92,14 @@ export abstract class AbstractControl {
   }
 
   removeAsyncValidators(asyncValidators: AsyncValidationFn[], updateValidity: boolean = false): void {
-    this.#asyncValidators.value = this.asyncValidators.filter(asyncValidator => {
+    this._asyncValidators.value = this.asyncValidators.filter(asyncValidator => {
       return asyncValidators.some(s => s === asyncValidator || s.name === asyncValidator.name) ? false : true;
     });
     updateValidity && this.updateValidity({ updateParentValidity: updateValidity, runAsyncValidators: false });
   }
   
   clearAsyncValidators(updateValidity: boolean = false): void {
-    this.#asyncValidators.value = [];
+    this._asyncValidators.value = [];
     updateValidity && this.updateValidity({ updateParentValidity: updateValidity, runAsyncValidators: false });
   }
 
@@ -111,68 +111,70 @@ export abstract class AbstractControl {
   }
 
   hasError(errorName: string): boolean {
-    return errorName in this.#errors.value;
+    return errorName in this._errors.value;
   }
 
   hasErrors(errorNames: string[]): boolean {
-    return errorNames.every(errorName => errorName in this.#errors.value)
+    return errorNames.every(errorName => errorName in this._errors.value)
   }
 
   hasAnyError(errorNames: string[]): boolean {
-    return errorNames.some(errorName => errorName in this.#errors.value);
+    return errorNames.some(errorName => errorName in this._errors.value);
   }
 
   setErrors(errors: ValidationErrors): void {
-    this.#errors.value = { ...errors };
+    this._errors.value = { ...errors };
   }
 
   addErrors(errors: ValidationErrors): void {
-    this.#errors.value = {
-      ...this.#errors.value,
+    this._errors.value = {
+      ...this._errors.value,
       ...errors
     };
   }
 
   getErrors(errorNames: string[]): ValidationErrors {
     return errorNames.reduce((errors: ValidationErrors, errorName) => {
-      errors[errorName] = this.#errors.value[errorName];
+      errors[errorName] = this._errors.value[errorName];
       return errors;
     }, {});
   }
 
   removeErrors(errorNames: string[]): void {
-    const currentErrors = { ...this.#errors.value };
+    const currentErrors = { ...this._errors.value };
     errorNames.forEach((errorName) => {
       delete currentErrors[errorName];
     });
-    this.#errors.value = currentErrors;
+    this._errors.value = currentErrors;
   }
 
   clearErrors(): void {
-    this.#errors.value = {};
+    this._errors.value = {};
   }
 
   setParent(parent: FormGroup | FormArray | null): void {
-    this.#parent.value = parent;
+    this._parent.value = parent;
   }
 
   setDirty(value: boolean, updateParentDirty: boolean = false): void {
-    this.#dirty.value = value;
+    this._dirty.value = value;
     if (this.parent && updateParentDirty) {
       this.parent.setDirty(value, updateParentDirty);
     }
   }
 
   updateValidity({ updateParentValidity = true, runAsyncValidators = true }: ControlUpdateOptions = {}): void {
-    this.#cancelExistingAsyncValidator();
+    this._cancelExistingAsyncValidator();
 
-    this.#errors.value = this.#validators.value.reduce((errors: ValidationErrors, validator) => ({
+    const errors = this.validators.reduce((errors: ValidationErrors, validator) => ({
       ...errors,
       ...validator(this),
     }), {}) as ValidationErrors;
 
-    if (this.valid && runAsyncValidators && this.#asyncValidators.value.length > 0) {
-      this.#runAsyncValidators();
+    this.setErrors(errors);
+
+    if (this.valid && runAsyncValidators && this.asyncValidators.length > 0) {
+      this._runAsyncValidators();
     }
 
     if (updateParentValidity) {
@@ -180,14 +182,14 @@ export abstract class AbstractControl {
     }
   }
 
-  #runAsyncValidators() {
-    this.#hasOwnPendingAsyncValidator.value = true;
+  private _runAsyncValidators() {
+    this._hasOwnPendingAsyncValidator.value = true;
 
-    this.#existingCancelableAsyncValidators = this.#asyncValidators.value.map(asyncValidator => {
-      return this.#makeCancelableAsyncValidator(asyncValidator);
+    this._existingCancelableAsyncValidators = this.asyncValidators.map(asyncValidator => {
+      return this._makeCancelableAsyncValidator(asyncValidator);
     });
 
-    Promise.allSettled(this.#existingCancelableAsyncValidators).then((resultErrors) => {
+    Promise.allSettled(this._existingCancelableAsyncValidators).then((resultErrors) => {
       const errors = resultErrors.reduce((collectedErrors, error) => {
         console.log(resultErrors);
         if (error.status === 'fulfilled') {
@@ -196,13 +198,13 @@ export abstract class AbstractControl {
         return collectedErrors;
       }, {} as ValidationErrors);
 
-      this.#hasOwnPendingAsyncValidator.value = false;
-      this.#errors.value = errors;
-      this.#existingCancelableAsyncValidators = [];
+      this._hasOwnPendingAsyncValidator.value = false;
+      this.setErrors(errors);
+      this._existingCancelableAsyncValidators = [];
     });
   }
 
-  #makeCancelableAsyncValidator(asyncValidator: AsyncValidationFn) {
+  private _makeCancelableAsyncValidator(asyncValidator: AsyncValidationFn) {
     const abortController = new AbortController();
     
     const promise = new Promise((resolve, reject) => {
@@ -222,11 +224,11 @@ export abstract class AbstractControl {
     return promise;
   }
 
-  #cancelExistingAsyncValidator() {
-    this.#existingCancelableAsyncValidators.forEach((asyncValidator) => {
+  private _cancelExistingAsyncValidator() {
+    this._existingCancelableAsyncValidators.forEach((asyncValidator) => {
       asyncValidator.cancel();
     });
-    this.#hasOwnPendingAsyncValidator.value = false;
+    this._hasOwnPendingAsyncValidator.value = false;
   }
 
   abstract get<TResult extends AbstractControl>(path: string | string[]): TResult | null;

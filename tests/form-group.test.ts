@@ -1,5 +1,5 @@
 import { AbstractControl, FormArray, FormControl, FormGroup } from '../src';
-import { controlErrors } from './helpers';
+import { controlErrors, nestedValue } from './helpers';
 
 describe('FormGroup', () => {
   const initialValue = 666;
@@ -24,6 +24,42 @@ describe('FormGroup', () => {
 
   it('returns correct value of FormGroup', () => {
     expect(formGroup.value).toEqual({ firstControl: initialValue });
+  });
+
+  it('returns correct value of FormGroup with nested controls', () => {
+    formGroup.addControls({
+      control_0: new FormArray([
+        new FormGroup({
+          array_0: new FormControl(null),
+          array_1: new FormControl(undefined),
+          array_2: new FormControl({ text: 'Text', value: 1, }),
+        }),
+        new FormArray([
+          new FormControl([1, 2, 3])
+        ])
+      ]),
+      control_1: new FormArray([
+        new FormArray([
+          new FormControl([1, 2, 3]),
+          new FormArray([
+            new FormControl([1, 2, 3])
+          ])
+        ])
+      ])
+    });
+
+    expect(formGroup.value).toEqual(nestedValue);
+
+    formGroup.addControl('test_1', new FormArray([
+      new FormControl('test_value'),
+    ]));
+
+    expect(formGroup.value).toEqual({
+      ...nestedValue,
+      test_1: [
+        'test_value',
+      ]
+    });
   });
 
   describe('getters', () => {
@@ -110,8 +146,10 @@ describe('FormGroup', () => {
       formGroup.reset();
       
       expect(formGroup.value).toEqual({
-        firstControl: initialValue,
+        firstControl: undefined,
       });
     });
-  })
+  });
+
+
 })

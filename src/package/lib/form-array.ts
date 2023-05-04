@@ -5,26 +5,26 @@ import { AbstractControl } from "./abstract-conrol";
 
 
 export class FormArray extends AbstractControl {
-  #currentControls: ReactiveValue<AbstractControl[]> = reactive({ value: [] });
+  private readonly _controls: ReactiveValue<AbstractControl[]> = reactive({ value: [] });
 
   constructor(controls: AbstractControl[], validators?: ValidationFn[], asyncValidators?: AsyncValidationFn[]) {
     super(validators, asyncValidators);
-    this.#updateCurrentControls(controls, { updateParentValidity: false, runAsyncValidators: false });
+    this._updateCurrentControls(controls, { updateParentValidity: false, runAsyncValidators: false });
   }
 
   get controls(): AbstractControl[] {
-    return this.#currentControls.value as AbstractControl[];
+    return this._controls.value as AbstractControl[];
   }
 
   get value(): any[] {
-    return this.#currentControls.value.map(control => control.value);
+    return this._controls.value.map(control => control.value);
   }
 
   get valid(): boolean {
     const hasNoError = Object.values(this.errors).length === 0;
-    const controls = Object.values(this.#currentControls.value);
+    const controls = Object.values(this._controls.value);
     const allControlsHasValidState = controls.every((control) => {
-      control.valid;
+      return control.valid;
     });
 
     return hasNoError && allControlsHasValidState;
@@ -39,56 +39,56 @@ export class FormArray extends AbstractControl {
   }
 
   addControl(control: AbstractControl, { updateParentValidity = true, runAsyncValidators = false, updateParentDirty = true }: ControlUpdateOptions = {}) {
-    this.#updateCurrentControls([control], { updateParentValidity, runAsyncValidators });
+    this._updateCurrentControls([control], { updateParentValidity, runAsyncValidators });
     this.setDirty(true, updateParentDirty);
   }
 
   addControls(controls: AbstractControl[], { updateParentValidity = true, runAsyncValidators = false, updateParentDirty = true }: ControlUpdateOptions = {}) {
-    this.#updateCurrentControls(controls, { updateParentValidity, runAsyncValidators });
+    this._updateCurrentControls(controls, { updateParentValidity, runAsyncValidators });
     this.setDirty(true, updateParentDirty);
   }
 
   setControl(index: number, control: AbstractControl, { updateParentValidity = true, runAsyncValidators = false, updateParentDirty = true }: ControlUpdateOptions = {}) {
-    this.#insertControlByIndex(index, control);
+    this._insertControlByIndex(index, control);
     this.updateValidity({ updateParentValidity, runAsyncValidators });
     this.setDirty(true, updateParentDirty);
   }
 
   setControls(controls: { index: number, control: AbstractControl }[], { updateParentValidity = true, runAsyncValidators = false, updateParentDirty = true }: ControlUpdateOptions = {}) {
     controls.forEach(({ index, control }) => {
-      this.#insertControlByIndex(index, control);
+      this._insertControlByIndex(index, control);
     });
     this.updateValidity({ updateParentValidity, runAsyncValidators });
     this.setDirty(true, updateParentDirty);
   }
 
   setValue(values: unknown[], { updateParentValidity = true, runAsyncValidators = true, updateParentDirty = true }: ControlUpdateOptions = {}): void {
-    this.#currentControls.value.forEach((contol, index) => {
+    this._controls.value.forEach((contol, index) => {
       contol.setValue(values[index], { updateParentValidity, runAsyncValidators });
     });
     this.setDirty(true, updateParentDirty);
   }
 
   at<TResult extends AbstractControl>(index: number): TResult {
-    return this.#currentControls.value.at(index) as TResult;
+    return this._controls.value.at(index) as TResult;
   }
 
   firstChild<TResult extends AbstractControl>(): TResult {
-    return this.#currentControls.value.at(0) as TResult;
+    return this._controls.value.at(0) as TResult;
   }
 
   lastChild<TResult extends AbstractControl>(): TResult {
-    return this.#currentControls.value.at(-1) as TResult;
+    return this._controls.value.at(-1) as TResult;
   }
 
   removeAt(index: number, { updateParentValidity = true, runAsyncValidators = false, updateParentDirty = true }: ControlUpdateOptions = {}) {
-    this.#removeControlByIndex(index);
+    this._removeControlByIndex(index);
     this.updateValidity({ updateParentValidity, runAsyncValidators });
     this.setDirty(true, updateParentDirty);
   }
 
   reset() {
-    for (const control of this.#currentControls.value) {
+    for (const control of this._controls.value) {
       control.reset();
     }
     this.clearErrors();
@@ -98,10 +98,10 @@ export class FormArray extends AbstractControl {
     this.at(index).setValue(value, { updateParentValidity, runAsyncValidators, updateParentDirty });
   }
 
-  #updateDynamicProperties() {
-    const properties = Object.keys(this.#currentControls.value).reduce<PropertyDescriptorMap>((properties, index) => {
+  private _updateDynamicProperties() {
+    const properties = Object.keys(this._controls.value).reduce<PropertyDescriptorMap>((properties, index) => {
       properties[index] = {
-        get: () => this.#currentControls.value[parseInt(index)],
+        get: () => this._controls.value[parseInt(index)],
         configurable: true,
         enumerable: true,
       }
@@ -111,24 +111,24 @@ export class FormArray extends AbstractControl {
     Object.defineProperties(this, properties);
   }
 
-  #updateCurrentControls(controls: AbstractControl[], options: ControlUpdateOptions) {
+  private _updateCurrentControls(controls: AbstractControl[], options: ControlUpdateOptions) {
     controls.forEach((control) => {
       control.setParent(this);
     });
-    this.#currentControls.value.push(...controls);
-    this.#updateDynamicProperties();
+    this._controls.value.push(...controls);
+    this._updateDynamicProperties();
     this.updateValidity({ updateParentValidity: options.updateParentValidity, runAsyncValidators: options.runAsyncValidators });
   }
 
-  #insertControlByIndex(index: number, control: AbstractControl) {
+  private _insertControlByIndex(index: number, control: AbstractControl) {
     if(this.at(index)) {
-      this.#currentControls.value[index] = control;
-      this.#currentControls.value[index].setParent(this);
+      this._controls.value[index] = control;
+      this._controls.value[index].setParent(this);
     };
   }
 
-  #removeControlByIndex(index: number) {
-    this.#currentControls.value.splice(index, 1);
-    this.#updateDynamicProperties();
+  private _removeControlByIndex(index: number) {
+    this._controls.value.splice(index, 1);
+    this._updateDynamicProperties();
   }
 }

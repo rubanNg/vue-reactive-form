@@ -19,7 +19,7 @@ describe('FormControl', () => {
       formControl.setErrors(controlErrors);
       formControl.reset();
 
-      expect(formControl.value).toBe(initialValue);
+      expect(formControl.value).toBe(undefined);
       expect(formControl.errors).toEqual({});
       expect(formControl.dirty).toBe(false);
     });
